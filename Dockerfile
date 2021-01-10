@@ -1,0 +1,3 @@
+FROM node:15
+
+EXPOSE 8003
