@@ -1,0 +1,22 @@
+.TransferButton {
+  width: 96px;
+  height: 96px;
+  background: rgba(0, 0, 0, .1) 0 0 no-repeat padding-box;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+
+  // Removing default styles
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: inherit;
+
+  .img {
+    width: 36px;
+    height: 40px;
+    border: 1px solid gray;
+  }
+}
