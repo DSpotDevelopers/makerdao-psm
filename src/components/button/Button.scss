@@ -1,0 +1,21 @@
+
+.Button {
+  width: 320px;
+  height: 72px;
+  background: transparent linear-gradient(270deg, #00DE78 0%, #00ACCB 100%) 0 0 no-repeat padding-box;
+  box-shadow: 0 3px 0 #000000B3;
+  border-radius: 8px;
+
+  text-align: center;
+  font: normal normal bold 32px/43px Roboto;
+  letter-spacing: 0;
+  color: #FFFFFF;
+  text-shadow: 0 2px 0 #00000029;
+  opacity: 1;
+
+  // Removing default styles
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: inherit;
+}
