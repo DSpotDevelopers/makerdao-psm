@@ -1,0 +1,27 @@
+.ConnectButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 230px;
+  height: 48px;
+  background: transparent linear-gradient(270deg, #00D975 0%, #00ACCB 100%) 0% 0% no-repeat padding-box;
+  border-radius: 32px;
+
+  text-align: left;
+  font: normal normal bold 18px/24px Roboto;
+  letter-spacing: 0;
+  color: #FFFFFF;
+  text-shadow: 0 2px 0 #00000029;
+  box-sizing: border-box;
+  padding-left: 15px;
+  position: relative;
+
+  .img {
+    position: absolute;
+    left: 14px;
+    width: 20px;
+    height: 18px;
+    border: 1px solid white;
+  }
+}
