@@ -1,5 +1,7 @@
 import React from 'react';
 import Select from "./Select";
+import usdc from "../../assets/usdc.png";
+import dai from "../../assets/dai.png";
 
 const info = {
     title: 'Select',
@@ -16,16 +18,18 @@ Default.args = {
     right: false
 };
 
-export const Right = Template.bind({});
-Right.args = {
-    value: 'right select',
-    right: true,
-    left: false
-};
-
 export const Left = Template.bind({});
 Left.args = {
     value: 'left select',
     right: false,
-    left: true
+    left: true,
+    img: dai
+};
+
+export const Right = Template.bind({});
+Right.args = {
+    value: 'right select',
+    right: true,
+    left: false,
+    img: usdc
 };
