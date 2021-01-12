@@ -28,7 +28,8 @@ const Operation = {
   SELL: 'sell',
 };
 
-const isConnected = (provider = Web3.givenProvider) => (new Web3(provider)).isConnected();
+// FIX: not working
+const isConnected = (provider = Web3.givenProvider) => (new Web3(provider)).isConnected;
 
 // TODO: Implement
 const connect = (provider = Web3.givenProvider) => provider;
