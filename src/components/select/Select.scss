@@ -1,36 +1,46 @@
-.Select {
-  padding-left: 80px;
-  position: relative;
+.SelectWrapper {
+  display: flex;
+  align-items: center;
 
-  &:before {
-    position: absolute;
-    content: '<';
-    left: -16px;
-    font-size: 16px;
+  .ArrowLeft, .ArrowRight {
+    width: 7px;
+    height: 12px;
   }
 
-  .Img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 1px solid gray;
-    left: 8px;
-    position: absolute;
+  .ArrowLeft {
+    transform: rotate(180deg);
+    margin-right: 16px;
   }
 
-  &.Right {
-    padding-left: 30px;
-    padding-right: 80px;
+  .ArrowRight {
+    margin-left: 16px;
+  }
 
-    &:before {
-      content: '>';
-      left: unset;
-      right: -16px;
+  .Select {
+    position: relative;
+
+    &:before, &:after {
+      width: 7px;
+      height: 12px;
     }
 
     .Img {
-      left: unset;
-      right: 8px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid gray;
+      left: 8px;
+      position: absolute;
+    }
+
+    &.Right {
+      padding-left: 30px;
+      padding-right: 80px;
+
+      .Img {
+        left: unset;
+        right: 8px;
+      }
     }
   }
 }
