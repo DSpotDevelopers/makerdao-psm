@@ -19,5 +19,13 @@ Default.args = {
 export const Right = Template.bind({});
 Right.args = {
     value: 'right select',
-    right: true
+    right: true,
+    left: false
+};
+
+export const Left = Template.bind({});
+Left.args = {
+    value: 'left select',
+    right: false,
+    left: true
 };
