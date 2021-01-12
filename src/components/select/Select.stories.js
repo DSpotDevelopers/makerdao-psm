@@ -1,23 +1,23 @@
 import React from 'react';
-import Input from "./Input";
+import Select from "./Select";
 
 const info = {
-    title: 'Input',
-    component: Input
+    title: 'Select',
+    component: Select
 };
 
 export default info;
 
-const Template = (args) => <Input {...args} />;
+const Template = (args) => <Select {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
-    value: '0.00',
+    value: 'select',
     right: false
 };
 
 export const Right = Template.bind({});
 Right.args = {
-    value: '0.00',
+    value: 'right select',
     right: true
 };

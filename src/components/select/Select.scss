@@ -1,0 +1,36 @@
+.Input {
+  padding-left: 80px;
+  position: relative;
+
+  &:before {
+    position: absolute;
+    content: '<';
+    left: -16px;
+    font-size: 16px;
+  }
+
+  .Img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid gray;
+    left: 8px;
+    position: absolute;
+  }
+
+  &.Right {
+    padding-left: 30px;
+    padding-right: 80px;
+
+    &:before {
+      content: '>';
+      left: unset;
+      right: -16px;
+    }
+
+    .Img {
+      left: unset;
+      right: 8px;
+    }
+  }
+}
