@@ -33,6 +33,10 @@
       position: absolute;
     }
 
+    &.Left {
+      padding-left: 80px;
+    }
+
     &.Right {
       padding-left: 30px;
       padding-right: 80px;
