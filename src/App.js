@@ -1,9 +1,10 @@
-import React from "react";
-import Main from "./views/main/Main";
+import React from 'react';
+import Main from './views/main/Main';
 
 function App() {
   return (
-    <Main/>
+    // eslint-disable-next-line react/jsx-filename-extension
+    <Main />
   );
 }
 
