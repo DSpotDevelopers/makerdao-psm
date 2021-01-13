@@ -44,6 +44,6 @@
   }
 
   &.Fulfilled {
-    background: transparent linear-gradient(225deg, #00D975 0%, #00ACCB 100%) 0 0 no-repeat padding-box;
+    background: url("../../assets/transfer-success.svg");
   }
 }
