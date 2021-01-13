@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../input/Input.scss';
 import './Info.scss';
 
-const Info = ({ value = '', img = '' }) => (
+const Info = ({ value, img }) => (
   <div className={`Input Info ${img ? 'HasImg' : ''}`}>
     {img && <img className="Img" src={img} alt="Icon" />}
     {value}
@@ -13,6 +13,11 @@ const Info = ({ value = '', img = '' }) => (
 Info.propTypes = {
   value: PropTypes.string,
   img: PropTypes.string,
+};
+
+Info.defaultProps = {
+  value: '',
+  img: '',
 };
 
 export default Info;
