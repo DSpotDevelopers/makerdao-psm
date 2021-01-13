@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import "./Main.scss";
 import logo from "../../assets/logo.svg";
 import ConnectButton from "../../components/connect-button/ConnectButton";
@@ -10,6 +10,12 @@ import Usdc from "../../assets/usdc.png";
 import Button from "../../components/button/Button";
 
 const Main = () => {
+    const [entryValue, setEntryValue] = useState(0);
+
+    const handleEntryChange = ({target: {value}}) => {
+        setEntryValue(value);
+    }
+
     return <div className={'MainContainer'}>
         <div className={'LogoContainer'}>
             <img src={logo} alt="Logo"/>
@@ -20,7 +26,7 @@ const Main = () => {
             <div className="Side Left">
                 <span className={'Label'}>From</span>
                 <div style={{marginBottom: '16px'}}>
-                    <Input left={true} value={'Enter Amount...'}/>
+                    <Input left={true} value={entryValue} onChange={handleEntryChange}/>
                 </div>
                 <Select left={true} value={'DAI'} img={DaiImg}/>
             </div>

@@ -1,9 +1,12 @@
-import React from "react";
+import React, {useState} from "react";
 import PropTypes from "prop-types";
 import "./Input.scss";
 
-const Input = ({value = '', left = false, right = false}) => {
-    return <div className={`Input ${left ? 'Left' : ''} ${right ? 'Right' : ''}`}>{value}</div>
+const Input = ({value = '', left = false, right = false, onChange = () => {}, placeholder = 'Enter Amount...'}) => {
+    const [focused, setFocused] = useState(false);
+    return <div className={`Input ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${focused ? 'Focused' : ''}`}>
+        <input type="number" value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder}/>
+    </div>
 };
 
 Input.propTypes = {
