@@ -19,6 +19,10 @@
   .Select {
     position: relative;
 
+    &.Input {
+      width: 270px;
+    }
+
     &:before, &:after {
       width: 7px;
       height: 12px;
@@ -28,7 +32,6 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      border: 1px solid gray;
       left: 8px;
       position: absolute;
     }

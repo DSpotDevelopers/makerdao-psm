@@ -1,10 +1,9 @@
-import Button from "./components/button/Button";
+import React from "react";
+import Main from "./views/main/Main";
 
 function App() {
   return (
-    <h1>MakerDAO
-    <Button label={'Molestiae error dolo'}/>
-    </h1>
+    <Main/>
   );
 }
 
