@@ -1,0 +1,53 @@
+.SelectWrapper {
+  display: flex;
+  align-items: center;
+
+  .ArrowLeft, .ArrowRight {
+    width: 7px;
+    height: 12px;
+  }
+
+  .ArrowLeft {
+    transform: rotate(180deg);
+    margin-right: 16px;
+  }
+
+  .ArrowRight {
+    margin-left: 16px;
+  }
+
+  .Select {
+    position: relative;
+
+    &.Input {
+      width: 270px;
+    }
+
+    &:before, &:after {
+      width: 7px;
+      height: 12px;
+    }
+
+    .Img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      left: 8px;
+      position: absolute;
+    }
+
+    &.Left {
+      padding-left: 80px;
+    }
+
+    &.Right {
+      padding-left: 30px;
+      padding-right: 80px;
+
+      .Img {
+        left: unset;
+        right: 8px;
+      }
+    }
+  }
+}

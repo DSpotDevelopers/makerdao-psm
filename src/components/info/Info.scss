@@ -1,0 +1,16 @@
+.Info {
+  position: relative;
+  padding-left: 80px;
+
+  &.HasImg {
+    margin-left: 80px;
+  }
+
+  .Img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    left: 8px;
+    position: absolute;
+  }
+}

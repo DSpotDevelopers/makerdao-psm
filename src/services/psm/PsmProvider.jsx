@@ -1,4 +1,5 @@
 import React, { createContext, useContext } from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import PropTypes from 'prop-types';
 import Web3 from 'web3';
 import { legos } from '@studydefi/money-legos';

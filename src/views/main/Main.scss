@@ -1,0 +1,78 @@
+.MainContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
+  width: 100%;
+  min-height: 100vh;
+
+  .LogoContainer {
+    display: block;
+    color: #22E4AC;
+    font-family: Roboto, sans-serif;
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 64px;
+
+    img {
+      width: 110px;
+      height: 95px;
+      margin-bottom: 32px;
+    }
+
+    div {
+      text-align: center;
+    }
+  }
+
+  .ConnectButton {
+    margin-bottom: 54px;
+  }
+
+  .TradeContainer {
+    display: flex;
+    margin-bottom: 250px;
+
+    .Side {
+      display: flex;
+      flex-direction: column;
+
+      &.Left {
+        align-items: flex-end;
+      }
+
+      &.Right {
+        align-items: flex-start;
+      }
+
+      .Label {
+        text-align: center;
+        font: normal normal 300 24px/32px Roboto;
+        letter-spacing: 0;
+        color: #FFFFFF;
+        opacity: 0.3;
+        margin-bottom: 15px;
+        align-self: center;
+      }
+    }
+
+    .Center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 192px;
+    }
+  }
+
+  .Button {
+    margin-bottom: 61px;
+  }
+
+  .Copyright {
+    text-align: center;
+    font: normal normal 300 18px/24px Roboto;
+    color: rgba(255, 255, 255, .3);
+  }
+}

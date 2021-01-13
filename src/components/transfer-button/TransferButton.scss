@@ -1,0 +1,49 @@
+.TransferButton {
+  width: 96px;
+  height: 96px;
+  background: rgba(255, 255, 255, .1) 0 0 no-repeat padding-box;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  position: relative;
+
+  // Removing default styles
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: inherit;
+  transition: background .3s ease;
+
+  .img {
+    width: 20px;
+    height: 36px;
+    transition: left .3s ease;
+    position: absolute;
+
+    &.img1 {
+      left: 30px;
+    }
+
+    &.img2 {
+      left: 50px;
+    }
+  }
+
+  &:hover, &.Clicked {
+    .img2 {
+      left: 70px;
+    }
+  }
+
+  &.Clicked {
+    .img1 {
+      left: 50px;
+    }
+  }
+
+  &.Fulfilled {
+    background: url("../../assets/transfer-success.svg");
+  }
+}
