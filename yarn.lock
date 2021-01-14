@@ -1829,11 +1829,6 @@
   dependencies:
     mkdirp "^1.0.4"
 
-"@openzeppelin/contracts@^2.5.0":
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-2.5.1.tgz#c76e3fc57aa224da3718ec351812a4251289db31"
-  integrity sha512-qIy6tLx8rtybEsIOAlrM4J/85s2q2nPkDqj/Rx46VakBZ0LwtFhXIVub96LXHczQX0vaqmAueDqNPXtbSXSaYQ==
-
 "@pmmmwh/react-refresh-webpack-plugin@0.4.2":
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.4.2.tgz#1f9741e0bde9790a0e13272082ed7272a083620d"
@@ -2473,13 +2468,6 @@
     regenerator-runtime "^0.13.7"
     resolve-from "^5.0.0"
     store2 "^2.7.1"
-
-"@studydefi/money-legos@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@studydefi/money-legos/-/money-legos-2.4.1.tgz#57d613f51aaa0a03fb9e14301ffda5804a57b0a6"
-  integrity sha512-60LErLtI+q0bCuwnhGQxK2pdsKPrwMYeQaIekXP2FOBUm6+k0qGl3Q5tly0eX2PkdC8ycxWeQSUvTIAHhmr4aQ==
-  dependencies:
-    "@openzeppelin/contracts" "^2.5.0"
 
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"

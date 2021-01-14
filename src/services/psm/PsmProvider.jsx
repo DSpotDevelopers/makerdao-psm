@@ -2,32 +2,28 @@ import React, { createContext, useContext } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import PropTypes from 'prop-types';
 import Web3 from 'web3';
-import { legos } from '@studydefi/money-legos';
-import PsmAbi from './abis/PSM.json';
-import VatAbi from './abis/VAT.json';
+import PsmAbi from './abi/PSM.json';
+import VatAbi from './abi/VAT.json';
+import ERC20Abi from './abi/ERC20.json';
 
 const Tokens = {
   DAI: 'DAI',
   USDC: 'USDC',
 };
 
-const Ilks = {
-  USDC: 'USDC-A',
-};
-
 const ABIs = {
-  ERC20: legos.erc20.abi,
+  ERC20: ERC20Abi,
   PSM: PsmAbi,
   VAT: VatAbi,
 };
 
 const Addresses = {
-  DAI: legos.erc20.dai.address,
+  DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
   USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
   GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
-  MCD_JOIN_USDC_A: legos.erc20.usdc.address,
-  VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
+  MCD_JOIN_USDC_A: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
+  VAT:  '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
 };
 
 const Operation = {
@@ -36,9 +32,13 @@ const Operation = {
 };
 
 const ApprovalAmount = {
-  USDC: 1.157920892373162e+71,
-  DAI: 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+  USDC: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
+  DAI: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
 };
+
+const USDC_DECIMALS = 10 ** 6;
+const WAD = 10 ** 18;
+const RAD = 10 ** 45;
 
 const buildContract = (abi, address, provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
@@ -50,37 +50,29 @@ const lockedOf = async (token, provider = Web3.givenProvider) => {
   return contract.methods.balanceOf(Addresses.MCD_JOIN_USDC_A).call();
 };
 
-const totalSupply = async (token, provider = Web3.givenProvider) => {
-  const contract = buildContract(ABIs.ERC20, Addresses[token], provider);
-  return contract.methods.totalSupply().call();
-};
-
 // FIX: not working
 const isConnected = (provider = Web3.givenProvider) => (new Web3(provider)).isConnected;
 
-const getStats = async (token, provider = Web3.givenProvider) => {
+const getStats = async (provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
-  const ilk = await vatContract.methods.ilks(web3.utils.fromAscii(Ilks[token])).call();
-  const debt = await vatContract.methods.debt().call();
-  const supply = await totalSupply(token);
-  const locked = await lockedOf(token);
+  const ilk = await vatContract.methods.ilks(web3.utils.fromAscii("PSM-USDC-A")).call();
+
+  const used = (ilk.Art / RAD) * ilk.rate;
+  const line = ilk.line / RAD;
+
   return {
-    used: ilk.Art * ilk.rate,
-    line: ilk.line,
-    daiPercent: (ilk.Art * ilk.rate * 100) / debt,
-    linePercent: (ilk.Art * ilk.rate * 100) / ilk.line,
-    // fee: 1,
-    locked,
-    lockedPercent: locked / supply,
+    used,
+    usedPercent: (used * 100) / line,
+    total: line,
   };
 };
 
 const getFees = async (provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
   return {
-    tin: await psmContract.methods.tin().call(),
-    tout: await psmContract.methods.tout().call(),
+    tin: await psmContract.methods.tin().call() * 100 / WAD,      //USDC -> DAI
+    tout: await psmContract.methods.tout().call() * 100 / WAD,    //DAI -> USDC
   };
 };
 
@@ -92,9 +84,6 @@ const getOperation = (from, to) => {
   }
   return from === Tokens.DAI ? Operation.BUY : Operation.SELL;
 };
-
-const WAD = 10 ** 18;
-const USDC_DECIMALS = 10 ** 6;
 
 const approve = async (from, to, provider = Web3.givenProvider) => {
   const { tout } = await getFees(provider);
