@@ -33,7 +33,7 @@
 
   .TradeContainer {
     display: flex;
-    margin-bottom: 250px;
+    margin-bottom: 58px;
 
     .Side {
       display: flex;
@@ -63,6 +63,31 @@
       align-items: center;
       justify-content: center;
       width: 192px;
+    }
+  }
+
+  .InfoContainer {
+    height: 64px;
+    margin-bottom: 128px;
+
+    .Input {
+      margin-left: 0;
+
+      .InfoData {
+        display: flex;
+        justify-content: space-between;
+        font: normal normal bold 22px/29px Roboto;
+        color: #FFFFFF;
+
+        span {
+          opacity: 0.5;
+        }
+
+        .Data {
+          text-align: right;
+          opacity: 0.7;
+        }
+      }
     }
   }
 
