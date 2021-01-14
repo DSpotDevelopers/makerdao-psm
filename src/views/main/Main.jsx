@@ -43,7 +43,10 @@ const Main = () => {
         </div>
       </div>
       <Button label="Trade" />
-      <div className="Copyright">A Maker Community Project</div>
+      <div className="Copyright">
+        A Maker Community Project
+        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">docs</a>
+      </div>
     </div>
   );
 };
