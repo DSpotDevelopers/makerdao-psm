@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './Main.scss';
 import logo from '../../assets/logo.svg';
 import ConnectButton from '../../components/connect-button/ConnectButton';
@@ -12,7 +12,6 @@ import Info from '../../components/info/Info';
 import InfoImg from '../../assets/dollar.svg';
 
 const Main = () => {
-
   const [entryValue, setEntryValue] = useState(0);
 
   const handleEntryChange = ({ target: { value } }) => {
