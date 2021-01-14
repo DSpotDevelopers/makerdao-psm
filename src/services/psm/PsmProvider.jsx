@@ -8,11 +8,11 @@ import VatAbi from './abis/VAT.json';
 
 const Tokens = {
   DAI: 'DAI',
-  USDC_A: 'USDC-A',
-  PSM: 'PSM',
-  GEM_JOIN: 'GEM_JOIN',
-  MCD_JOIN_USDC_A: 'MCD_JOIN_USDC_A',
-  VAT: 'VAT',
+  USDC: 'USDC',
+};
+
+const Ilks = {
+  USDC: 'USDC-A',
 };
 
 const ABIs = {
@@ -23,7 +23,7 @@ const ABIs = {
 
 const Addresses = {
   DAI: legos.erc20.dai.address,
-  USDC_A: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
   GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
   MCD_JOIN_USDC_A: legos.erc20.usdc.address,
@@ -35,24 +35,24 @@ const Operation = {
   SELL: 'sell',
 };
 
-const lockedOf = async (token, provider = Web3.givenProvider) => {
+const ApprovalAmount = {
+  USDC: 1.157920892373162e+71,
+  DAI: 115792089237316195423570985008687907853269984665640564039457584007913129639935,
+};
+
+const buildContract = (abi, address, provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
-  const contract = new web3.eth.Contract(ABIs.ERC20, Addresses.USDC_A);
-  let locked;
-  await contract.methods.balanceOf(Addresses.MCD_JOIN_USDC_A).call((err, val) => {
-    locked = val;
-  });
-  return locked;
+  return new web3.eth.Contract(abi, address);
+};
+
+const lockedOf = async (token, provider = Web3.givenProvider) => {
+  const contract = buildContract(ABIs.ERC20, Addresses[token], provider);
+  return contract.methods.balanceOf(Addresses.MCD_JOIN_USDC_A).call();
 };
 
 const totalSupply = async (token, provider = Web3.givenProvider) => {
-  const web3 = new Web3(provider);
-  const contract = new web3.eth.Contract(ABIs.ERC20, Addresses.USDC_A);
-  let suuply;
-  await contract.methods.totalSupply().call((err, val) => {
-    suuply = val;
-  });
-  return suuply;
+  const contract = buildContract(ABIs.ERC20, Addresses[token], provider);
+  return contract.methods.totalSupply().call();
 };
 
 // FIX: not working
@@ -60,15 +60,9 @@ const isConnected = (provider = Web3.givenProvider) => (new Web3(provider)).isCo
 
 const getStats = async (token, provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
-  const vatContract = new web3.eth.Contract(ABIs.VAT, Addresses.VAT);
-  let ilk;
-  await vatContract.methods.ilks(web3.utils.fromAscii(token)).call((err, val) => {
-    ilk = val;
-  });
-  let debt;
-  await vatContract.methods.debt().call((err, val) => {
-    debt = val;
-  });
+  const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
+  const ilk = await vatContract.methods.ilks(web3.utils.fromAscii(Ilks[token])).call();
+  const debt = await vatContract.methods.debt().call();
   const supply = await totalSupply(token);
   const locked = await lockedOf(token);
   return {
@@ -82,6 +76,14 @@ const getStats = async (token, provider = Web3.givenProvider) => {
   };
 };
 
+const getFees = async (provider = Web3.givenProvider) => {
+  const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
+  return {
+    tin: await psmContract.methods.tin().call(),
+    tout: await psmContract.methods.tout().call(),
+  };
+};
+
 const isValidOperation = (from, to) => from !== to && (from === Tokens.DAI || to === Tokens.DAI);
 
 const getOperation = (from, to) => {
@@ -92,38 +94,23 @@ const getOperation = (from, to) => {
 };
 
 const WAD = 10 ** 18;
-const TRADE_FACTOR = 10 ** 6;
+const USDC_DECIMALS = 10 ** 6;
 
-const approve = async (from, to, amount, provider = Web3.givenProvider) => {
-  const web3 = new Web3(provider);
-  const psmContract = web3.eth.Contract(ABIs.PSM, Addresses.PSM);
-  let tout;
-  await psmContract.methods.tout().call((err, value) => {
-    tout = value;
-  });
+const approve = async (from, to, provider = Web3.givenProvider) => {
+  const { tout } = await getFees(provider);
   const [contract, approvalAddress, approvalAmount] = getOperation(from, to) === Operation.BUY
-    ? [web3.eth.Contract(ABIs.ERC20, Addresses.DAI), Addresses.PSM, amount * (tout + WAD)]
-    : [web3.eth.Contract(ABIs.ERC20, Addresses.USDC_A), Addresses.GEM_JOIN, amount * TRADE_FACTOR];
-
-  let operationApproved = false;
-  await contract.methods.approve().call(approvalAddress, approvalAmount,
-    (err, value) => {
-      operationApproved = value;
-    });
-  return operationApproved;
+    ? [buildContract(ABIs.ERC20, Addresses.DAI), Addresses.PSM, ApprovalAmount.DAI * (tout + WAD)]
+    : [buildContract(ABIs.ERC20, Addresses.USDC),
+      Addresses.GEM_JOIN, ApprovalAmount.USDC * USDC_DECIMALS];
+  return contract.methods.approve(approvalAddress, approvalAmount).call();
 };
 
 const trade = async (from, to, amount, walletAddress, provider = Web3.givenProvider) => {
-  const web3 = new Web3(provider);
-  const psmContract = web3.eth.Contract(ABIs.PSM, Addresses.PSM);
+  const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
   const tradeOperation = getOperation(from, to) === Operation.BUY
     ? psmContract.methods.buyGem
     : psmContract.methods.sellGem;
-  let traded = false;
-  await tradeOperation().call(walletAddress, amount * TRADE_FACTOR, (err) => {
-    if (!err) traded = true;
-  });
-  return traded;
+  await tradeOperation(walletAddress, amount * USDC_DECIMALS).call();
 };
 
 const PsmContext = createContext(null);
@@ -134,6 +121,7 @@ const PsmProvider = ({
   trade: tradeFunc,
   lockedOf: lockedOfFunc,
   getStats: getStatsFunc,
+  getFees: getFeesFunc,
   validGems,
   children,
 }) => {
@@ -142,6 +130,7 @@ const PsmProvider = ({
     validGems,
     approve: approveFunc,
     trade: tradeFunc,
+    getFees: getFeesFunc,
     getStats: getStatsFunc,
     lockedOf: lockedOfFunc,
   };
@@ -159,6 +148,7 @@ PsmProvider.propTypes = {
   trade: PropTypes.func,
   lockedOf: PropTypes.func,
   getStats: PropTypes.func,
+  getFees: PropTypes.func,
   validGems: PropTypes.arrayOf(PropTypes.string),
   children: PropTypes.element.isRequired,
 };
@@ -168,8 +158,9 @@ PsmProvider.defaultProps = {
   approve,
   trade,
   getStats,
+  getFees,
   lockedOf,
-  validGems: [Tokens.USDC_A],
+  validGems: [Tokens.USDC],
 };
 
 export default PsmProvider;
