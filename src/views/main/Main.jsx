@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './Main.scss';
 import logo from '../../assets/logo.svg';
 import ConnectButton from '../../components/connect-button/ConnectButton';
@@ -10,7 +10,6 @@ import Usdc from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import InfoImg from '../../assets/dollar.svg';
-import { usePsmService } from '../../services/psm/PsmProvider';
 
 const Main = () => {
   const [entryValue, setEntryValue] = useState(0);
@@ -22,18 +21,29 @@ const Main = () => {
   // eslint-disable-next-line no-unused-vars
   const [showInfo, setShowInfo] = useState(true);
 
-  const psmService = usePsmService();
-  const [stats, setStats] = useState(undefined);
-  const [fees, setFees] = useState(undefined);
-  useEffect(async () => {
-    setStats(await psmService.getStats('USDC'));
-    setFees(await psmService.getFees());
-  }, []);
+  const currencies = [{
+    name: 'DAI',
+    image: DaiImg,
+  }, {
+    name: 'USDC',
+    image: Usdc,
+  }];
 
-  // eslint-disable-next-line no-console
-  console.log(stats, fees);
+  const [leftValue, setLeftValue] = useState(currencies[0]);
+  const [rightValue, setRightValue] = useState(currencies[1]);
+
+  const handleClick = (el, isLeft) => {
+    const opposite = currencies.filter((x) => x.name !== el.name)[0];
+    if (isLeft) {
+      setLeftValue(el);
+      setRightValue(opposite);
+    } else {
+      setRightValue(el);
+      setLeftValue(opposite);
+    }
+  };
+
   return (
-
     <div className="MainContainer">
       <div className="LogoContainer">
         <img src={logo} alt="Logo" />
@@ -46,7 +56,12 @@ const Main = () => {
           <div style={{ marginBottom: '16px' }}>
             <Input left value={entryValue} onChange={handleEntryChange} />
           </div>
-          <Select left value="DAI" img={DaiImg} />
+          <Select
+            left
+            value={leftValue}
+            elements={currencies}
+            handleClick={handleClick}
+          />
         </div>
         <div className="Center">
           <TransferButton />
@@ -56,7 +71,12 @@ const Main = () => {
           <div style={{ marginBottom: '16px' }}>
             <Input right value="0.00" />
           </div>
-          <Select right value="USDC" img={Usdc} />
+          <Select
+            right
+            value={rightValue}
+            elements={currencies}
+            handleClick={handleClick}
+          />
         </div>
       </div>
       <div className="InfoContainer">
@@ -72,9 +92,9 @@ const Main = () => {
       </div>
       <Button label="Trade" />
       <div className="Copyright">
-        A Maker Community Project
+        <div>A Maker Community Project</div>
+        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
       </div>
-      <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
     </div>
   );
 };
