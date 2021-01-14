@@ -31,23 +31,14 @@ const Operation = {
   SELL: 'sell',
 };
 
-const ApprovalAmount = {
-  USDC: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
-  DAI: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,
-};
-
 const USDC_DECIMALS = 10 ** 6;
 const WAD = 10 ** 18;
 const RAD = 10 ** 45;
+const MAX_APPROVAL_AMOUNT = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
 const buildContract = (abi, address, provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
   return new web3.eth.Contract(abi, address);
-};
-
-const lockedOf = async (token, provider = Web3.givenProvider) => {
-  const contract = buildContract(ABIs.ERC20, Addresses[token], provider);
-  return contract.methods.balanceOf(Addresses.MCD_JOIN_USDC_A).call();
 };
 
 // FIX: not working
@@ -85,21 +76,21 @@ const getOperation = (from, to) => {
   return from === Tokens.DAI ? Operation.BUY : Operation.SELL;
 };
 
-const approve = async (from, to, provider = Web3.givenProvider) => {
-  const { tout } = await getFees(provider);
+const approve = async (from, to, account, provider = Web3.givenProvider) => {
   const [contract, approvalAddress, approvalAmount] = getOperation(from, to) === Operation.BUY
-    ? [buildContract(ABIs.ERC20, Addresses.DAI), Addresses.PSM, ApprovalAmount.DAI * (tout + WAD)]
-    : [buildContract(ABIs.ERC20, Addresses.USDC),
-      Addresses.GEM_JOIN, ApprovalAmount.USDC * USDC_DECIMALS];
-  return contract.methods.approve(approvalAddress, approvalAmount).call();
+    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM, MAX_APPROVAL_AMOUNT]
+    : [buildContract(ABIs.ERC20, Addresses.USDC, provider), Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
+
+  return contract.methods.approve(approvalAddress, approvalAmount).send({ from: account });
 };
 
-const trade = async (from, to, amount, walletAddress, provider = Web3.givenProvider) => {
+const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
-  const tradeOperation = getOperation(from, to) === Operation.BUY
-    ? psmContract.methods.buyGem
-    : psmContract.methods.sellGem;
-  await tradeOperation(walletAddress, amount * USDC_DECIMALS).call();
+  const [operation, amount] = getOperation(from, to) === Operation.BUY
+    ? [psmContract.methods.buyGem, pAmount * USDC_DECIMALS]
+    : [psmContract.methods.sellGem, pAmount * WAD];
+
+  await operation(account, amount.toString()).send({ from: account });
 };
 
 const PsmContext = createContext(null);
@@ -148,7 +139,6 @@ PsmProvider.defaultProps = {
   trade,
   getStats,
   getFees,
-  lockedOf,
   validGems: [Tokens.USDC],
 };
 

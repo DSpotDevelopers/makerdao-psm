@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Main.scss';
 import logo from '../../assets/logo.svg';
 import ConnectButton from '../../components/connect-button/ConnectButton';
@@ -10,6 +10,7 @@ import Usdc from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 
 const Main = () => {
+
   const [entryValue, setEntryValue] = useState(0);
 
   const handleEntryChange = ({ target: { value } }) => {
@@ -17,6 +18,7 @@ const Main = () => {
   };
 
   return (
+
     <div className="MainContainer">
       <div className="LogoContainer">
         <img src={logo} alt="Logo" />
@@ -45,8 +47,8 @@ const Main = () => {
       <Button label="Trade" />
       <div className="Copyright">
         A Maker Community Project
-        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">docs</a>
       </div>
+      <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
     </div>
   );
 };
