@@ -5,6 +5,8 @@
   background: transparent linear-gradient(270deg, #00DE78 0%, #00ACCB 100%) 0 0 no-repeat padding-box;
   box-shadow: 0 3px 0 #000000B3;
   border-radius: 8px;
+  transition: background-color .3s ease;
+  position: relative;
 
   text-align: center;
   font: normal normal bold 32px/43px Roboto;
@@ -18,4 +20,33 @@
   padding: 0;
   cursor: pointer;
   outline: inherit;
+
+  &:before {
+    left:0;
+    top: 0;
+    border-radius: 8px;
+    position: absolute;
+    content: '';
+    width: 320px;
+    height: 72px;
+    background: rgba(255, 255, 255, .3);
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+
+  &:hover {
+    .ArrowGroup {
+      display: block;
+    }
+    &:before {
+      opacity: .4;
+    }
+  }
+
+  .ArrowGroup {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top:  10px;
+  }
 }
