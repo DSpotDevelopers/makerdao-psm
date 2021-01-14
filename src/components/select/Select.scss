@@ -14,7 +14,9 @@
 
   &:hover,&.Opened {
     .Background {
-      width: 340px;
+      &.Left, &.Right {
+        width: 360px;
+      }
       border-radius: 32px;
       background: rgba(255, 255, 255 ,.1) !important;
 
@@ -56,14 +58,12 @@
 
     &.Left {
       left: 20px;
-      width: 360px;
       background: transparent linear-gradient(90deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, 0) 100%) 0 0 no-repeat padding-box;
       border-radius: 32px 0 0 32px;
     }
 
     &.Right {
       right: 20px;
-      width: 360px;
       background: transparent linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .1) 100%) 0 0 no-repeat padding-box;
       border-radius: 0 32px 32px 0;
     }
@@ -130,18 +130,18 @@
     width: 360px;
 
     &.Left {
-      left: 16px;
+      left: 22px;
       .Input {
         &:before {
-          left: -32px;
+          left: -38px;
         }
       }
     }
     &.Right {
-      right: 16px;
+      right: 22px;
       .Input {
         &:before {
-          left: 32px;
+          left: 38px;
         }
       }
     }
