@@ -47,7 +47,7 @@ const ConnectButton = () => {
   return (
     <div className="ConnectButtonWrapper no-select">
       {/* eslint-disable-next-line max-len */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions,no-return-await */}
       <div className={`Gradient ${connected ? '' : 'Connecting'}`} onClick={async () => await handleConnection()}>
         <img src={imgWallet} alt="wallet" className="img" />
       </div>

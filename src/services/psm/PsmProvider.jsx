@@ -23,7 +23,7 @@ const Addresses = {
   PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
   GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
   MCD_JOIN_USDC_A: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
-  VAT:  '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
+  VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
 };
 
 const Operation = {
@@ -34,7 +34,7 @@ const Operation = {
 const USDC_DECIMALS = 10 ** 6;
 const WAD = 10 ** 18;
 const RAD = 10 ** 45;
-const MAX_APPROVAL_AMOUNT = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+const MAX_APPROVAL_AMOUNT = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
 
 const buildContract = (abi, address, provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
@@ -47,7 +47,7 @@ const isConnected = (provider = Web3.givenProvider) => (new Web3(provider)).isCo
 const getStats = async (provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
-  const ilk = await vatContract.methods.ilks(web3.utils.fromAscii("PSM-USDC-A")).call();
+  const ilk = await vatContract.methods.ilks(web3.utils.fromAscii('PSM-USDC-A')).call();
 
   const used = (ilk.Art / RAD) * ilk.rate;
   const line = ilk.line / RAD;
@@ -62,8 +62,8 @@ const getStats = async (provider = Web3.givenProvider) => {
 const getFees = async (provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
   return {
-    tin: await psmContract.methods.tin().call() * 100 / WAD,      //USDC -> DAI
-    tout: await psmContract.methods.tout().call() * 100 / WAD,    //DAI -> USDC
+    tin: await (psmContract.methods.tin().call() * 100) / WAD, // USDC -> DAI
+    tout: await (psmContract.methods.tout().call() * 100) / WAD, // DAI -> USDC
   };
 };
 
@@ -79,7 +79,8 @@ const getOperation = (from, to) => {
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
   const [contract, approvalAddress, approvalAmount] = getOperation(from, to) === Operation.BUY
     ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM, MAX_APPROVAL_AMOUNT]
-    : [buildContract(ABIs.ERC20, Addresses.USDC, provider), Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
+    : [buildContract(ABIs.ERC20, Addresses.USDC, provider),
+      Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
 
   return contract.methods.approve(approvalAddress, approvalAmount).send({ from: account });
 };
@@ -140,6 +141,7 @@ PsmProvider.defaultProps = {
   getStats,
   getFees,
   validGems: [Tokens.USDC],
+  lockedOf: () => {},
 };
 
 export default PsmProvider;
