@@ -65,11 +65,6 @@ const Main = () => {
     setInputValue(value);
   };
 
-  const isBuying = () => {
-    if (!outputCurrency) return false;
-    return outputCurrency.name === 'DAI';
-  }
-
   // eslint-disable-next-line no-unused-vars
   const [showInfo, setShowInfo] = useState(true);
 
@@ -107,6 +102,11 @@ const Main = () => {
     }
   };
 
+  const isBuying = () => {
+    if (!outputCurrency) return false;
+    return outputCurrency.name === 'DAI';
+  }
+
   //
   // Trade Logic
   //
@@ -119,8 +119,8 @@ const Main = () => {
       setOutputValue(0.00);
       return;
     }
-    const tempFee = inputValue * (isBuying()? fees.tout : fees.tin) / 100;
-    setOutputValue(inputValue - (isBuying()? tempFee : 0));
+    const tempFee = inputValue * (isBuying() ? fees.tout : fees.tin) / 100;
+    setOutputValue(inputValue - (isBuying() ? tempFee : 0));
     setFee(tempFee);
   }, [inputValue, inputCurrency]);
 
@@ -200,7 +200,7 @@ const Main = () => {
       console.log({va: isBuying(), inputValue, outputValue});
 
       await psmService.trade(inputCurrency.name, outputCurrency.name,
-        isBuying()? inputValue : outputValue, account, provider);
+        isBuying() ? inputValue : outputValue, account, provider);
 
       notify({
         type: 'success',
@@ -290,8 +290,8 @@ const Main = () => {
       <div className="NotificationsContainer">
         {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
-      <Button label={connected? (approved? "Trade" : "Approve") : "Connect"}
-              onClick={() => connected? (approved? trade() : approve()) : connect()} />
+      <Button label={connected ? (approved ? "Trade" : "Approve") : "Connect"}
+              onClick={() => connected ? (approved ? trade() : approve()) : connect()} />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
