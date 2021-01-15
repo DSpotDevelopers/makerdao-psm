@@ -197,8 +197,6 @@ const Main = () => {
     setTrading(true);
 
     try {
-      console.log({va: isBuying(), inputValue, outputValue});
-
       await psmService.trade(inputCurrency.name, outputCurrency.name,
         isBuying() ? inputValue : outputValue, account, provider);
 
