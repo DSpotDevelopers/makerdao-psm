@@ -4,9 +4,9 @@ import '../input/Input.scss';
 import './Info.scss';
 
 const Info = ({
-  value, img, children,
+  value, img, children, left,
 }) => (
-  <div className={`Input Info ${img ? 'HasImg' : ''}`}>
+  <div className={`Input Info ${img ? 'HasImg' : ''} ${left ? 'Left' : ''}`}>
     {img && <img className="Img" src={img} alt="Icon" />}
     {!children && value}
     {children && children}
@@ -17,11 +17,13 @@ Info.propTypes = {
   value: PropTypes.string,
   img: PropTypes.string,
   children: PropTypes.element,
+  left: PropTypes.bool,
 };
 
 Info.defaultProps = {
   value: '',
   img: '',
+  left: false,
   children: null,
 };
 

@@ -9,7 +9,7 @@ import DaiImg from '../../assets/dai.png';
 import Usdc from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
-import InfoImg from '../../assets/dollar.svg';
+import StatsImg from '../../assets/dollar.svg';
 
 const Main = () => {
   const [entryValue, setEntryValue] = useState(0);
@@ -81,19 +81,42 @@ const Main = () => {
       </div>
       <div className="InfoContainer">
         {showInfo && (
-        <Info img={InfoImg}>
-          <div className="InfoData">
-            <span>Fees:</span>
-            {' '}
-            <span className="Data">$45.99 / (0.1%)</span>
-          </div>
-        </Info>
+          <Info img={StatsImg}>
+            <div className="InfoData">
+              <span>Fees:</span>
+              {' '}
+              <span className="Data">$45.99 / (0.1%)</span>
+            </div>
+          </Info>
         )}
       </div>
       <Button label="Trade" />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
+      </div>
+
+      <div className="Stats">
+        <Info img={StatsImg} left>
+          <div className="StatsText">
+            Currency Reserves
+          </div>
+        </Info>
+        <div className="StatsRow">
+          <div className="Image">
+            <img src={Usdc} alt="usdc" />
+          </div>
+          <div className="StatsInfo">
+            <div className="Label">USDC:</div>
+            <div className="Value">104,248,477.15 (42.80%)</div>
+          </div>
+        </div>
+        <div className="StatsRow">
+          <div className="StatsInfo">
+            <div className="Label">Liquidity Utilization:</div>
+            <div className="Value">30.96%</div>
+          </div>
+        </div>
       </div>
     </div>
   );

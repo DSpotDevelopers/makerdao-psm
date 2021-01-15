@@ -108,4 +108,65 @@
       text-decoration: none;
     }
   }
+
+  .Stats {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 40px;
+    margin-top: -150px;
+
+    .Input {
+      margin-left: 0;
+    }
+
+    .StatsText {
+      text-align: left;
+      font: normal normal bold 18px/24px Roboto;
+      letter-spacing: 0;
+      color: #FFFFFF;
+      opacity: 0.5;
+    }
+
+    .StatsRow {
+      display: flex;
+      align-items: center;
+      height: 56px;
+      padding-left: 5px;
+
+      .Image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+
+        img {
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      .StatsInfo {
+        display: flex;
+        justify-content: space-between;
+        font: normal normal 300 16px/21px Roboto;
+        color: #FFFFFF;
+        width: 100%;
+
+        .Label {
+          padding-left: 16px;
+          text-align: left;
+          font-weight: bold;
+          opacity: 0.5;
+        }
+
+        .Value {
+          text-align: right;
+          opacity: 0.4;
+          padding-right: 40px;
+        }
+      }
+    }
+  }
 }
