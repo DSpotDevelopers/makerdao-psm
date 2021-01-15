@@ -33,7 +33,7 @@
 
   .TradeContainer {
     display: flex;
-    margin-bottom: 250px;
+    margin-bottom: 58px;
 
     .Side {
       display: flex;
@@ -66,6 +66,31 @@
     }
   }
 
+  .InfoContainer {
+    height: 64px;
+    margin-bottom: 128px;
+
+    .Input {
+      margin-left: 0;
+
+      .InfoData {
+        display: flex;
+        justify-content: space-between;
+        font: normal normal bold 22px/29px Roboto;
+        color: #FFFFFF;
+
+        span {
+          opacity: 0.5;
+        }
+
+        .Data {
+          text-align: right;
+          opacity: 0.7;
+        }
+      }
+    }
+  }
+
   .Button {
     margin-bottom: 61px;
   }
@@ -74,5 +99,11 @@
     text-align: center;
     font: normal normal 300 18px/24px Roboto;
     color: rgba(255, 255, 255, .3);
+
+    a {
+      margin-left: 10px;
+      color: white;
+      text-decoration: none;
+    }
   }
 }

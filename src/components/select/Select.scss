@@ -1,10 +1,79 @@
 .SelectWrapper {
   display: flex;
   align-items: center;
+  cursor: pointer;
+  position: relative;
+
+  &.Left {
+    right: 50px;
+  }
+
+  &.Right {
+    left: 50px;
+  }
+
+  &:hover,&.Opened {
+    .Background {
+      &.Left, &.Right {
+        width: 360px;
+      }
+      border-radius: 32px;
+      background: rgba(255, 255, 255 ,.1) !important;
+
+      &.Left {
+        left: -16px;
+        border-radius: 32px;
+      }
+
+      &.Right {
+        right: -16px;
+        border-radius: 32px;
+      }
+    }
+
+    .ArrowRight, .ArrowLeft {
+      filter: brightness(200%);
+    }
+
+    .ArrowLeft {
+      transform: rotate(90deg);
+    }
+
+    .ArrowRight {
+      transform: rotate(90deg);
+    }
+  }
+
+  .Background {
+    background: rgba(255, 255, 255, .07);
+    width: 320px;
+    height: 64px;
+    position: absolute;
+    transition: all .3s ease;
+    z-index: 0;
+
+    &.Opened {
+      border-radius: 32px 32px 0 0 !important;
+    }
+
+    &.Left {
+      left: 20px;
+      background: transparent linear-gradient(90deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, 0) 100%) 0 0 no-repeat padding-box;
+      border-radius: 32px 0 0 32px;
+    }
+
+    &.Right {
+      right: 20px;
+      background: transparent linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .1) 100%) 0 0 no-repeat padding-box;
+      border-radius: 0 32px 32px 0;
+    }
+  }
 
   .ArrowLeft, .ArrowRight {
     width: 7px;
     height: 12px;
+    transition: all .3s ease;
+    z-index: 100;
   }
 
   .ArrowLeft {
@@ -18,6 +87,7 @@
 
   .Select {
     position: relative;
+    background: transparent;
 
     &.Input {
       width: 270px;
@@ -47,6 +117,60 @@
       .Img {
         left: unset;
         right: 8px;
+      }
+    }
+  }
+
+
+  .Options {
+    top: 64px;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 360px;
+
+    &.Left {
+      left: 22px;
+      .Input {
+        &:before {
+          left: -38px;
+        }
+      }
+    }
+    &.Right {
+      right: 22px;
+      .Input {
+        &:before {
+          left: 38px;
+        }
+      }
+    }
+
+    .Input {
+      width: 100%;
+      border-radius: 0;
+      position: relative;
+
+      &.Last {
+        &:before {
+          border-radius: 0 0 32px 32px;
+        }
+      }
+
+      &:before {
+        content: '';
+        height: 64px;
+        width: 360px;
+        top: 0;
+        background: rgba(255, 255, 255, 0);
+        transition: background .3s ease;
+        position: absolute;
+      }
+
+      &:hover {
+        &:before {
+          background: rgba(255, 255, 255, .5);
+        }
       }
     }
   }

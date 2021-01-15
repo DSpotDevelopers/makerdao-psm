@@ -1,12 +1,10 @@
-.ConnectButton {
+.ConnectButtonWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-
+  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0 0 no-repeat padding-box;
   width: 230px;
   height: 48px;
-  background: transparent linear-gradient(270deg, #00D975 0%, #00ACCB 100%) 0% 0% no-repeat padding-box;
-  border-radius: 32px;
 
   text-align: left;
   font: normal normal bold 18px/24px Roboto;
@@ -14,14 +12,52 @@
   color: #FFFFFF;
   text-shadow: 0 2px 0 #00000029;
   box-sizing: border-box;
-  padding-left: 15px;
+  padding-left: 70px;
   position: relative;
+  border-radius: 32px;
 
-  .img {
+  .Gradient {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
-    left: 14px;
-    width: 20px;
-    height: 18px;
-    border: 1px solid white;
+    left: 0;
+    cursor: pointer;
+
+    width: 48px;
+    height: 48px;
+    background: transparent linear-gradient(270deg, #00D975 0%, #00ACCB 100%) 0 0 no-repeat padding-box;
+    border-radius: 32px;
+    transition: all .3s ease;
+    z-index: 1;
+
+    &.Connecting {
+      width: 230px;
+    }
+
+    .img {
+      position: absolute;
+      left: 14px;
+      width: 20px;
+      height: 18px;
+      border: 1px solid white;
+    }
+  }
+
+  span {
+    margin-left: -45px;
+    z-index: 2;
+  }
+
+  input {
+    outline: none;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font: normal normal bold 18px/24px Roboto;
+    letter-spacing: 0;
+    color: #FFFFFF;
+    text-shadow: 0 2px 0 #00000029;
+    opacity: 0.7;
   }
 }

@@ -1,12 +1,9 @@
 import React from 'react';
-import { usePsmService } from './services/psm/PsmProvider';
+import Main from './views/main/Main';
 
 function App() {
-  const psmService = usePsmService();
   return (
-    <div>
-      <h1>{psmService.validGems}</h1>
-    </div>
+    <Main />
   );
 }
 
