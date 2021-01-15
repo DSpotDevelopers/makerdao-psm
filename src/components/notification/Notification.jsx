@@ -6,7 +6,7 @@ import './Notification.scss';
 const Notification = ({ value, type }) => (
   <div className={`Notification ${type}`}>
     {type === 'Error' && <img className="Img" src={error} alt="" />}
-    {value}
+    {value.length > 120 ? `${value.substr(0, 120)}...` : value}
   </div>
 );
 

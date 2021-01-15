@@ -13,21 +13,48 @@ import Usdc from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
+import InfoImg from '../../assets/hand.svg';
 import { usePsmService } from '../../services/psm/PsmProvider';
+import Notification from '../../components/notification/Notification';
 
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 const Main = () => {
+  //
+  // Notifications Logic
+  //
+  const [notification, setNotification] = useState(null);
+
+  const notify = ({ type, message }) => {
+    setNotification({
+      type,
+      message,
+    });
+
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  //
+  // PSM
+  //
   const psmService = usePsmService();
   // eslint-disable-next-line no-unused-vars
   const [stats, setStats] = useState(undefined);
   // eslint-disable-next-line no-unused-vars
   const [fees, setFees] = useState(undefined);
+
   useEffect(async () => {
-    setStats(await psmService.getStats());
-    setFees(await psmService.getFees());
+    try {
+      setStats(await psmService.getStats());
+      setFees(await psmService.getFees());
+    } catch (e) {
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
+    }
   }, []);
 
   const [inputValue, setInputValue] = useState(undefined);
@@ -124,9 +151,16 @@ const Main = () => {
       setAccount(accounts[0]);
       setConnected(true);
       setProvider(tempProvider);
+      notify({
+        type: 'Success',
+        message: 'Connected to wallet successfully',
+      });
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
     }
   };
 
@@ -138,14 +172,19 @@ const Main = () => {
     try {
       await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
       // eslint-disable-next-line max-len
-      const result = await psmService.trade(inputCurrency.name, outputCurrency.name, inputValue, account, provider);
+      await psmService.trade(inputCurrency.name, outputCurrency.name, inputValue, account, provider);
       // eslint-disable-next-line no-console
-      console.log(result);
+      notify({
+        type: 'success',
+        message: 'Transference finished successfully',
+      });
       setTrading(false);
     } catch (e) {
       setTrading(false);
-      // eslint-disable-next-line no-console
-      console.log(e);
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
     }
   };
 
@@ -187,7 +226,7 @@ const Main = () => {
       </div>
       <div className="InfoContainer">
         {showInfo && inputValue && fee && (
-          <Info img={StatsImg}>
+          <Info img={InfoImg}>
             <div className="InfoData">
               <span>Fees:</span>
               {' '}
@@ -202,6 +241,9 @@ const Main = () => {
             </div>
           </Info>
         )}
+      </div>
+      <div className="NotificationsContainer">
+        {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
       <Button label="Trade" onClick={trade} />
       <div className="Copyright">
