@@ -61,7 +61,7 @@ const Main = () => {
   const [outputValue, setOutputValue] = useState(0.00);
   const [fee, setFee] = useState(0.00);
 
-  const handleEntryChange = ({ target: { value } }) => {
+  const handleEntryChange = async ({ target: { value } }) => {
     setInputValue(value);
   };
 
@@ -82,14 +82,23 @@ const Main = () => {
   const [inputCurrency, setInputCurrency] = useState(currencies[0]);
   const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
 
-  const handleClick = (el, isLeft) => {
+  const handleClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
+    let inputCurrencyTmp, outputCurrencyTmp;
+
     if (isLeft) {
-      setInputCurrency(el);
-      setOutputCurrency(opposite);
+      inputCurrencyTmp = el;
+      outputCurrencyTmp = opposite;
     } else {
-      setOutputCurrency(el);
-      setInputCurrency(opposite);
+      outputCurrencyTmp = el;
+      inputCurrencyTmp = opposite;
+    }
+
+    setInputCurrency(inputCurrencyTmp);
+    setOutputCurrency(outputCurrencyTmp);
+
+    if (account) {
+      await checkApproval(inputCurrencyTmp.name, outputCurrencyTmp.name, account);
     }
   };
 
@@ -105,7 +114,7 @@ const Main = () => {
       setOutputValue(0.00);
       return;
     }
-    const tempFee = inputValue * (inputCurrency.name === 'USDC' ? fees.tin : fees.tout);
+    const tempFee = inputValue * (inputCurrency.name === 'USDC' ? fees.tin : fees.tout) / 100;
     setOutputValue(inputValue - tempFee);
     setFee(tempFee);
   }, [inputValue, inputCurrency]);
@@ -114,6 +123,8 @@ const Main = () => {
   // Connection Logic
   //
   const [connected, setConnected] = useState(false);
+  const [approved, setApproved] = useState(false);
+
   // eslint-disable-next-line no-unused-vars
   const [account, setAccount] = useState(undefined);
 
@@ -136,7 +147,7 @@ const Main = () => {
 
   const [provider, setProvider] = useState(undefined);
 
-  const handleConnection = async () => {
+  const connect = async () => {
     if (connected) {
       setConnected(false);
       return;
@@ -151,6 +162,9 @@ const Main = () => {
       setAccount(accounts[0]);
       setConnected(true);
       setProvider(tempProvider);
+
+      await checkApproval(inputCurrency.name, outputCurrency.name, accounts[0]);
+
       notify({
         type: 'Success',
         message: 'Connected to wallet successfully',
@@ -167,10 +181,17 @@ const Main = () => {
   const trade = async () => {
     if (!account) return;
 
+    if (!inputValue) {
+      notify({
+        type: 'Error',
+        message: "You should input how much you want to trade"
+      });
+      return;
+    }
+
     setTrading(true);
 
     try {
-      await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
       // eslint-disable-next-line max-len
       await psmService.trade(inputCurrency.name, outputCurrency.name, inputValue, account, provider);
       // eslint-disable-next-line no-console
@@ -188,13 +209,27 @@ const Main = () => {
     }
   };
 
+  const approve = async () => {
+    if (!account) return;
+
+    await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
+    await checkApproval(inputCurrency.name, outputCurrency.name, account);
+  }
+
+  const checkApproval = async (inputCurrency, outputCurrency, account) => {
+    let isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
+    setApproved(isApproved);
+
+    console.log("Is Approved: " + isApproved);
+  }
+
   return (
     <div className="MainContainer">
       <div className="LogoContainer">
         <img src={logo} alt="Logo" />
         <div>PSM</div>
       </div>
-      <ConnectButton onClick={handleConnection} connected={connected} walletId={account} />
+      <ConnectButton onClick={connect} connected={connected} walletId={account} />
       <div className="TradeContainer">
         <div className="Side Left">
           <span className="Label">From</span>
@@ -245,7 +280,8 @@ const Main = () => {
       <div className="NotificationsContainer">
         {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
-      <Button label="Trade" onClick={trade} />
+      <Button label={connected? (approved? "Trade" : "Approve") : "Connect"}
+              onClick={() => connected? (approved? trade() : approve()) : connect()} />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>

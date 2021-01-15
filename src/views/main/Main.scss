@@ -174,4 +174,11 @@
       }
     }
   }
+
+  @media only screen and (max-width: 1800px) {
+    .Stats {
+      display: none;
+    }
+  }
+
 }

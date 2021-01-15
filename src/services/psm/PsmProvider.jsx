@@ -35,14 +35,12 @@ const USDC_DECIMALS = 10 ** 6;
 const WAD = 10 ** 18;
 const RAD = 10 ** 45;
 const MAX_APPROVAL_AMOUNT = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+const MIN_APPROVAL_AMOUNT = '0x0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
 
 const buildContract = (abi, address, provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
   return new web3.eth.Contract(abi, address);
 };
-
-// FIX: not working
-const isConnected = (provider = Web3.givenProvider) => (new Web3(provider)).isConnected;
 
 const getStats = async (provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
@@ -78,12 +76,13 @@ const getOperation = (from, to) => {
   return from === Tokens.DAI ? Operation.BUY : Operation.SELL;
 };
 
-const isApproved = async (from, to, walletAddress, minimalAmount) => {
+const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider) => {
   const [contract, approvalAddress] = getOperation(from, to) === Operation.BUY
-    ? [buildContract(ABIs.ERC20, Addresses.DAI), Addresses.PSM]
-    : [buildContract(ABIs.ERC20, Addresses.USDC), Addresses.GEM_JOIN];
+    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM]
+    : [buildContract(ABIs.ERC20, Addresses.USDC, provider), Addresses.GEM_JOIN];
+
   const allowance = await contract.methods.allowance(walletAddress, approvalAddress).call();
-  return allowance >= minimalAmount;
+  return allowance >= MIN_APPROVAL_AMOUNT;
 };
 
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
@@ -99,7 +98,7 @@ const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) 
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
   const [operation, amount] = getOperation(from, to) === Operation.BUY
     ? [psmContract.methods.buyGem, pAmount * USDC_DECIMALS]
-    : [psmContract.methods.sellGem, pAmount * WAD];
+    : [psmContract.methods.sellGem, pAmount * USDC_DECIMALS];
 
   await operation(account, amount.toString()).send({ from: account });
 };
@@ -107,7 +106,6 @@ const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) 
 const PsmContext = createContext(null);
 
 const PsmProvider = ({
-  isConnected: isConnectedFunc,
   approve: approveFunc,
   isApproved: isApprovedFunc,
   trade: tradeFunc,
@@ -118,7 +116,6 @@ const PsmProvider = ({
   children,
 }) => {
   const value = {
-    isConnected: isConnectedFunc,
     validGems,
     approve: approveFunc,
     isApproved: isApprovedFunc,
@@ -136,7 +133,6 @@ const PsmProvider = ({
 };
 
 PsmProvider.propTypes = {
-  isConnected: PropTypes.func,
   approve: PropTypes.func,
   isApproved: PropTypes.func,
   trade: PropTypes.func,
@@ -148,7 +144,6 @@ PsmProvider.propTypes = {
 };
 
 PsmProvider.defaultProps = {
-  isConnected,
   approve,
   isApproved,
   trade,
