@@ -1,31 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './TransferButton.scss';
+import PropTypes from 'prop-types';
 import arrowUp from '../../assets/arrow-up.svg';
 
-const TransferButton = () => {
-  const [clicked, setClicked] = useState(false);
-  const [fulfilled, setFulfilled] = useState(false);
-
-  const handleClick = () => {
-    if (!clicked) setClicked(true);
-    if (clicked) setFulfilled(true);
-
-    if (clicked && fulfilled) {
-      setClicked(false);
-      setFulfilled(false);
-    }
-  };
-
-  return (
-    <button type="button" className={`TransferButton ${fulfilled ? 'Fulfilled' : ''} ${clicked ? 'Clicked' : ''}`} onClick={handleClick}>
-      {!fulfilled && (
+const TransferButton = ({ circleState }) => (
+  <button type="button" className={`TransferButton ${circleState === 1 ? 'Hovered' : ''} ${circleState === 3 ? 'Fulfilled' : ''} ${circleState === 2 ? 'Clicked' : ''}`}>
+    {!circleState < 3 && (
       <>
         <img src={arrowUp} className="img img1" alt="arrow" />
         <img src={arrowUp} className="img img2" alt="arrow" />
       </>
-      )}
-    </button>
-  );
+    )}
+  </button>
+);
+
+TransferButton.propTypes = {
+  circleState: PropTypes.number,
+};
+
+TransferButton.defaultProps = {
+  circleState: 0,
 };
 
 export default TransferButton;

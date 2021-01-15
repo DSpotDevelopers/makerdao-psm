@@ -12,7 +12,7 @@ import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
 
 const Main = () => {
-  const [entryValue, setEntryValue] = useState(0);
+  const [entryValue, setEntryValue] = useState(null);
 
   const handleEntryChange = ({ target: { value } }) => {
     setEntryValue(value);
@@ -43,6 +43,14 @@ const Main = () => {
     }
   };
 
+  const [trading, setTrading] = useState(false);
+
+  const handleTradeClick = () => {
+    setTrading(true);
+  };
+
+  const circleState = +(!!entryValue) + trading;
+
   return (
     <div className="MainContainer">
       <div className="LogoContainer">
@@ -64,7 +72,7 @@ const Main = () => {
           />
         </div>
         <div className="Center">
-          <TransferButton />
+          <TransferButton circleState={circleState} />
         </div>
         <div className="Side Right">
           <span className="Label">To</span>
@@ -90,7 +98,7 @@ const Main = () => {
           </Info>
         )}
       </div>
-      <Button label="Trade" />
+      <Button label="Trade" onClick={handleTradeClick} />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>

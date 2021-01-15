@@ -3,8 +3,8 @@ import './Button.scss';
 import PropTypes from 'prop-types';
 import arrowUp from '../../assets/arrow-up.svg';
 
-const Button = ({ label }) => (
-  <button type="button" className="Button">
+const Button = ({ label, onClick }) => (
+  <button type="button" className="Button" onClick={onClick}>
     {label}
     <div className="ArrowGroup">
       <img src={arrowUp} alt="arrow" />
@@ -16,10 +16,12 @@ const Button = ({ label }) => (
 
 Button.propTypes = {
   label: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 Button.defaultProps = {
   label: 'Button',
+  onClick: () => {},
 };
 
 export default Button;

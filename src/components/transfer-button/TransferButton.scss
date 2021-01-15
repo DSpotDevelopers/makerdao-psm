@@ -12,7 +12,6 @@
   // Removing default styles
   border: none;
   padding: 0;
-  cursor: pointer;
   outline: inherit;
   transition: background .3s ease;
 
@@ -31,7 +30,7 @@
     }
   }
 
-  &:hover, &.Clicked {
+  &.Hovered, &.Clicked {
     .img2 {
       left: 70px;
     }
