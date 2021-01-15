@@ -66,8 +66,8 @@ const Main = () => {
   };
 
   const isBuying = () => {
-    if (!inputCurrency) return false;
-    return inputCurrency.name === 'DAI';
+    if (!outputCurrency) return false;
+    return outputCurrency.name === 'DAI';
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -120,7 +120,7 @@ const Main = () => {
       return;
     }
     const tempFee = inputValue * (isBuying()? fees.tout : fees.tin) / 100;
-    setOutputValue(inputValue - (isBuying()? 0 : tempFee));
+    setOutputValue(inputValue - (isBuying()? tempFee : 0));
     setFee(tempFee);
   }, [inputValue, inputCurrency]);
 
@@ -197,6 +197,8 @@ const Main = () => {
     setTrading(true);
 
     try {
+      console.log({va: isBuying(), inputValue, outputValue});
+
       await psmService.trade(inputCurrency.name, outputCurrency.name,
         isBuying()? inputValue : outputValue, account, provider);
 
