@@ -96,6 +96,14 @@ const getOperation = (from, to) => {
 const WAD = 10 ** 18;
 const USDC_DECIMALS = 10 ** 6;
 
+const isApproved = async (from, to, walletAddress, minimalAmount) => {
+  const [contract, approvalAddress] = getOperation(from, to) === Operation.BUY
+    ? [buildContract(ABIs.ERC20, Addresses.DAI), Addresses.PSM]
+    : [buildContract(ABIs.ERC20, Addresses.USDC), Addresses.GEM_JOIN];
+  const allowance = await contract.methods.allowance(walletAddress, approvalAddress).call();
+  return allowance >= minimalAmount;
+};
+
 const approve = async (from, to, provider = Web3.givenProvider) => {
   const { tout } = await getFees(provider);
   const [contract, approvalAddress, approvalAmount] = getOperation(from, to) === Operation.BUY
@@ -118,6 +126,7 @@ const PsmContext = createContext(null);
 const PsmProvider = ({
   isConnected: isConnectedFunc,
   approve: approveFunc,
+  isApproved: isApprovedFunc,
   trade: tradeFunc,
   lockedOf: lockedOfFunc,
   getStats: getStatsFunc,
@@ -129,6 +138,7 @@ const PsmProvider = ({
     isConnected: isConnectedFunc,
     validGems,
     approve: approveFunc,
+    isApproved: isApprovedFunc,
     trade: tradeFunc,
     getFees: getFeesFunc,
     getStats: getStatsFunc,
@@ -145,6 +155,7 @@ const PsmProvider = ({
 PsmProvider.propTypes = {
   isConnected: PropTypes.func,
   approve: PropTypes.func,
+  isApproved: PropTypes.func,
   trade: PropTypes.func,
   lockedOf: PropTypes.func,
   getStats: PropTypes.func,
@@ -156,6 +167,7 @@ PsmProvider.propTypes = {
 PsmProvider.defaultProps = {
   isConnected,
   approve,
+  isApproved,
   trade,
   getStats,
   getFees,
