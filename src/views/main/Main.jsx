@@ -65,6 +65,11 @@ const Main = () => {
     setInputValue(value);
   };
 
+  const isBuying = () => {
+    if (!inputCurrency) return false;
+    return inputCurrency.name === 'DAI';
+  }
+
   // eslint-disable-next-line no-unused-vars
   const [showInfo, setShowInfo] = useState(true);
 
@@ -84,21 +89,21 @@ const Main = () => {
 
   const handleClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
-    let inputCurrencyTmp, outputCurrencyTmp;
+    let tempInputCurrency, tempOutputCurrency;
 
     if (isLeft) {
-      inputCurrencyTmp = el;
-      outputCurrencyTmp = opposite;
+      tempInputCurrency = el;
+      tempOutputCurrency = opposite;
     } else {
-      outputCurrencyTmp = el;
-      inputCurrencyTmp = opposite;
+      tempOutputCurrency = el;
+      tempInputCurrency = opposite;
     }
 
-    setInputCurrency(inputCurrencyTmp);
-    setOutputCurrency(outputCurrencyTmp);
+    setInputCurrency(tempInputCurrency);
+    setOutputCurrency(tempOutputCurrency);
 
     if (account) {
-      await checkApproval(inputCurrencyTmp.name, outputCurrencyTmp.name, account);
+      await checkApproval(tempInputCurrency.name, tempOutputCurrency.name, account);
     }
   };
 
@@ -114,8 +119,8 @@ const Main = () => {
       setOutputValue(0.00);
       return;
     }
-    const tempFee = inputValue * (inputCurrency.name === 'USDC' ? fees.tin : fees.tout) / 100;
-    setOutputValue(inputValue - tempFee);
+    const tempFee = inputValue * (isBuying()? fees.tout : fees.tin) / 100;
+    setOutputValue(inputValue - (isBuying()? 0 : tempFee));
     setFee(tempFee);
   }, [inputValue, inputCurrency]);
 
@@ -192,9 +197,9 @@ const Main = () => {
     setTrading(true);
 
     try {
-      // eslint-disable-next-line max-len
-      await psmService.trade(inputCurrency.name, outputCurrency.name, inputValue, account, provider);
-      // eslint-disable-next-line no-console
+      await psmService.trade(inputCurrency.name, outputCurrency.name,
+        isBuying()? inputValue : outputValue, account, provider);
+
       notify({
         type: 'success',
         message: 'Transference finished successfully',
@@ -219,8 +224,6 @@ const Main = () => {
   const checkApproval = async (inputCurrency, outputCurrency, account) => {
     let isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
     setApproved(isApproved);
-
-    console.log("Is Approved: " + isApproved);
   }
 
   return (

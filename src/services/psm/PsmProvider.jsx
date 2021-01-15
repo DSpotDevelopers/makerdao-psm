@@ -22,13 +22,7 @@ const Addresses = {
   USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
   GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
-  MCD_JOIN_USDC_A: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
   VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
-};
-
-const Operation = {
-  BUY: 'buy',
-  SELL: 'sell',
 };
 
 const USDC_DECIMALS = 10 ** 6;
@@ -69,15 +63,15 @@ const getFees = async (provider = Web3.givenProvider) => {
 
 const isValidOperation = (from, to) => from !== to && (from === Tokens.DAI || to === Tokens.DAI);
 
-const getOperation = (from, to) => {
+const isBuying = (from, to) => {
   if (!isValidOperation(from, to)) {
     throw new Error('Only trades between DAI and other gems are allowed');
   }
-  return from === Tokens.DAI ? Operation.BUY : Operation.SELL;
+  return from === Tokens.DAI;
 };
 
 const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider) => {
-  const [contract, approvalAddress] = getOperation(from, to) === Operation.BUY
+  const [contract, approvalAddress] = isBuying(from, to)
     ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM]
     : [buildContract(ABIs.ERC20, Addresses.USDC, provider), Addresses.GEM_JOIN];
 
@@ -86,7 +80,7 @@ const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider
 };
 
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
-  const [contract, approvalAddress, approvalAmount] = getOperation(from, to) === Operation.BUY
+  const [contract, approvalAddress, approvalAmount] = isBuying(from, to)
     ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM, MAX_APPROVAL_AMOUNT]
     : [buildContract(ABIs.ERC20, Addresses.USDC, provider),
       Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
@@ -96,7 +90,7 @@ const approve = async (from, to, account, provider = Web3.givenProvider) => {
 
 const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
-  const [operation, amount] = getOperation(from, to) === Operation.BUY
+  const [operation, amount] = isBuying(from, to)
     ? [psmContract.methods.buyGem, pAmount * USDC_DECIMALS]
     : [psmContract.methods.sellGem, pAmount * USDC_DECIMALS];
 
