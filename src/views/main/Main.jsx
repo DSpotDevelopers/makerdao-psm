@@ -236,33 +236,38 @@ const Main = () => {
       </div>
       <ConnectButton onClick={connect} connected={connected} walletId={account} />
       <div className="TradeContainer">
-        <div className="Side Left">
+        <div className="labels">
           <span className="Label">From</span>
-          <div style={{ marginBottom: '16px' }}>
-            <Input left value={inputValue} onChange={handleEntryChange} />
-          </div>
-          <Select
-            left
-            value={inputCurrency}
-            elements={currencies}
-            handleClick={handleClick}
-          />
-        </div>
-        <div className="Center">
-          <TransferButton circleState={circleState} />
-        </div>
-        <div className="Side Right">
           <span className="Label">To</span>
-          <div style={{ marginBottom: '16px' }}>
-            <Input right value={outputValue} />
-          </div>
-          <Select
-            right
-            value={outputCurrency}
-            elements={currencies}
-            handleClick={handleClick}
-          />
         </div>
+        <div className="container">
+          <div className="Side Left">
+            <div style={{ marginBottom: '16px' }}>
+              <Input left value={inputValue} onChange={handleEntryChange} />
+            </div>
+            <Select
+              left
+              value={inputCurrency}
+              elements={currencies}
+              handleClick={handleClick}
+            />
+          </div>
+          <div className="Center">
+            <TransferButton circleState={circleState} />
+          </div>
+          <div className="Side Right">
+            <div style={{ marginBottom: '16px' }}>
+              <Input right value={outputValue} />
+            </div>
+            <Select
+              right
+              value={outputCurrency}
+              elements={currencies}
+              handleClick={handleClick}
+            />
+          </div>
+        </div>
+
       </div>
       <div className="InfoContainer">
         {showInfo && inputValue && fee && (
