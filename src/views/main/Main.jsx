@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './Main.scss';
+import WalletConnectProvider from '@walletconnect/web3-provider';
+import Web3Modal from 'web3modal';
+import Web3 from 'web3';
 import logo from '../../assets/logo.svg';
 import ConnectButton from '../../components/connect-button/ConnectButton';
 import TransferButton from '../../components/transfer-button/TransferButton';
@@ -68,10 +71,6 @@ const Main = () => {
   //
   const [trading, setTrading] = useState(false);
 
-  const handleTradeClick = () => {
-    setTrading(true);
-  };
-
   const circleState = +(!!inputValue) + trading;
 
   useEffect(() => {
@@ -84,13 +83,79 @@ const Main = () => {
     setFee(tempFee);
   }, [inputValue, inputCurrency]);
 
+  //
+  // Connection Logic
+  //
+  const [connected, setConnected] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [account, setAccount] = useState(undefined);
+
+  const providerOptions = {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        infuraId: '994ffbdba376443ba4b5bb1e714467d1',
+      },
+    },
+  };
+
+  const web3Modal = new Web3Modal({
+    network: 'mainnet',
+    cacheProvider: false,
+    providerOptions,
+  });
+
+  web3Modal.clearCachedProvider();
+
+  const [provider, setProvider] = useState(undefined);
+
+  const handleConnection = async () => {
+    if (connected) {
+      setConnected(false);
+      return;
+    }
+    const tempProvider = await web3Modal.connect();
+
+    const web3 = new Web3(tempProvider);
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+
+      setAccount(accounts[0]);
+      setConnected(true);
+      setProvider(tempProvider);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
+  };
+
+  const trade = async () => {
+    if (!account) return;
+
+    setTrading(true);
+
+    try {
+      await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
+      // eslint-disable-next-line max-len
+      const result = await psmService.trade(inputCurrency.name, outputCurrency.name, inputValue, account, provider);
+      // eslint-disable-next-line no-console
+      console.log(result);
+      setTrading(false);
+    } catch (e) {
+      setTrading(false);
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
+  };
+
   return (
     <div className="MainContainer">
       <div className="LogoContainer">
         <img src={logo} alt="Logo" />
         <div>PSM</div>
       </div>
-      <ConnectButton />
+      <ConnectButton onClick={handleConnection} connected={connected} walletId={account} />
       <div className="TradeContainer">
         <div className="Side Left">
           <span className="Label">From</span>
@@ -138,7 +203,7 @@ const Main = () => {
           </Info>
         )}
       </div>
-      <Button label="Trade" onClick={handleTradeClick} />
+      <Button label="Trade" onClick={trade} />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>

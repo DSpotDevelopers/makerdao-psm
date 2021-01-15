@@ -16,7 +16,8 @@ const Info = ({
 Info.propTypes = {
   value: PropTypes.string,
   img: PropTypes.string,
-  children: PropTypes.element,
+  // eslint-disable-next-line react/forbid-prop-types
+  children: PropTypes.any,
   left: PropTypes.bool,
 };
 

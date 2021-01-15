@@ -34,6 +34,7 @@ const Select = ({
           // eslint-disable-next-line max-len
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
           <div
+            key={el.name}
             className={`Input Select ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${i === elementsToShow.length - 1 ? 'Last' : ''}`}
             onClick={() => {
               setOpened(false);
