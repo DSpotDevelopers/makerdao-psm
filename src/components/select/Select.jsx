@@ -33,7 +33,13 @@ const Select = ({
         {elementsToShow.map((el, i) => (
           // eslint-disable-next-line max-len
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
-          <div className={`Input Select ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${i === elementsToShow.length - 1 ? 'Last' : ''}`} onClick={() => handleClick(el, left)}>
+          <div
+            className={`Input Select ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${i === elementsToShow.length - 1 ? 'Last' : ''}`}
+            onClick={() => {
+              setOpened(false);
+              handleClick(el, left);
+            }}
+          >
             {el.image && <img className="Img" src={el.image} alt="currency" />}
             {el.name}
           </div>
@@ -46,7 +52,8 @@ const Select = ({
 };
 
 Select.propTypes = {
-  value: PropTypes.string,
+  // eslint-disable-next-line react/forbid-prop-types
+  value: PropTypes.any,
   left: PropTypes.bool,
   right: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types

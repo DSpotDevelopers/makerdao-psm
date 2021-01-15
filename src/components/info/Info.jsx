@@ -24,7 +24,7 @@ Info.defaultProps = {
   value: '',
   img: '',
   left: false,
-  children: null,
+  children: undefined,
 };
 
 export default Info;

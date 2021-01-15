@@ -62,8 +62,10 @@ const getStats = async (provider = Web3.givenProvider) => {
 const getFees = async (provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
   return {
-    tin: await (psmContract.methods.tin().call() * 100) / WAD, // USDC -> DAI
-    tout: await (psmContract.methods.tout().call() * 100) / WAD, // DAI -> USDC
+    // eslint-disable-next-line no-mixed-operators
+    tin: await psmContract.methods.tin().call() * 100 / WAD, // USDC -> DAI
+    // eslint-disable-next-line no-mixed-operators
+    tout: await psmContract.methods.tout().call() * 100 / WAD, // DAI -> USDC
   };
 };
 

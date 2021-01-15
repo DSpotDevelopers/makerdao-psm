@@ -14,7 +14,8 @@ const Input = ({
 };
 
 Input.propTypes = {
-  value: PropTypes.string,
+  // eslint-disable-next-line react/forbid-prop-types
+  value: PropTypes.any,
   right: PropTypes.bool,
   left: PropTypes.bool,
   onChange: PropTypes.func,

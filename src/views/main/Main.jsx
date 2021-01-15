@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Main.scss';
 import logo from '../../assets/logo.svg';
 import ConnectButton from '../../components/connect-button/ConnectButton';
@@ -10,17 +10,37 @@ import Usdc from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
+import { usePsmService } from '../../services/psm/PsmProvider';
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
 
 const Main = () => {
-  const [entryValue, setEntryValue] = useState(null);
+  const psmService = usePsmService();
+  // eslint-disable-next-line no-unused-vars
+  const [stats, setStats] = useState(undefined);
+  // eslint-disable-next-line no-unused-vars
+  const [fees, setFees] = useState(undefined);
+  useEffect(async () => {
+    setStats(await psmService.getStats());
+    setFees(await psmService.getFees());
+  }, []);
+
+  const [inputValue, setInputValue] = useState(undefined);
+  const [outputValue, setOutputValue] = useState(0.00);
+  const [fee, setFee] = useState(0.00);
 
   const handleEntryChange = ({ target: { value } }) => {
-    setEntryValue(value);
+    setInputValue(value);
   };
 
   // eslint-disable-next-line no-unused-vars
   const [showInfo, setShowInfo] = useState(true);
 
+  //
+  // Select values ang logic
+  //
   const currencies = [{
     name: 'DAI',
     image: DaiImg,
@@ -29,27 +49,40 @@ const Main = () => {
     image: Usdc,
   }];
 
-  const [leftValue, setLeftValue] = useState(currencies[0]);
-  const [rightValue, setRightValue] = useState(currencies[1]);
+  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
+  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
 
   const handleClick = (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
     if (isLeft) {
-      setLeftValue(el);
-      setRightValue(opposite);
+      setInputCurrency(el);
+      setOutputCurrency(opposite);
     } else {
-      setRightValue(el);
-      setLeftValue(opposite);
+      setOutputCurrency(el);
+      setInputCurrency(opposite);
     }
   };
 
+  //
+  // Trade Logic
+  //
   const [trading, setTrading] = useState(false);
 
   const handleTradeClick = () => {
     setTrading(true);
   };
 
-  const circleState = +(!!entryValue) + trading;
+  const circleState = +(!!inputValue) + trading;
+
+  useEffect(() => {
+    if (!fees && !inputValue) {
+      setOutputValue(0.00);
+      return;
+    }
+    const tempFee = inputValue * (inputCurrency.name === 'USDC' ? fees.tin : fees.tout);
+    setOutputValue(inputValue - tempFee);
+    setFee(tempFee);
+  }, [inputValue, inputCurrency]);
 
   return (
     <div className="MainContainer">
@@ -62,11 +95,11 @@ const Main = () => {
         <div className="Side Left">
           <span className="Label">From</span>
           <div style={{ marginBottom: '16px' }}>
-            <Input left value={entryValue} onChange={handleEntryChange} />
+            <Input left value={inputValue} onChange={handleEntryChange} />
           </div>
           <Select
             left
-            value={leftValue}
+            value={inputCurrency}
             elements={currencies}
             handleClick={handleClick}
           />
@@ -77,23 +110,30 @@ const Main = () => {
         <div className="Side Right">
           <span className="Label">To</span>
           <div style={{ marginBottom: '16px' }}>
-            <Input right value="0.00" />
+            <Input right value={outputValue} />
           </div>
           <Select
             right
-            value={rightValue}
+            value={outputCurrency}
             elements={currencies}
             handleClick={handleClick}
           />
         </div>
       </div>
       <div className="InfoContainer">
-        {showInfo && (
+        {showInfo && inputValue && fee && (
           <Info img={StatsImg}>
             <div className="InfoData">
               <span>Fees:</span>
               {' '}
-              <span className="Data">$45.99 / (0.1%)</span>
+              <span className="Data">
+                $
+                {fee.toFixed(2)}
+                {' '}
+                / (
+                {fees.tin}
+                %)
+              </span>
             </div>
           </Info>
         )}
@@ -116,13 +156,23 @@ const Main = () => {
           </div>
           <div className="StatsInfo">
             <div className="Label">USDC:</div>
-            <div className="Value">104,248,477.15 (42.80%)</div>
+            <div className="Value">
+              {stats && stats.used && numberWithCommas(stats.used.toFixed(2))}
+              {' '}
+              (
+              {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
+              %)
+            </div>
           </div>
         </div>
         <div className="StatsRow">
           <div className="StatsInfo">
             <div className="Label">Liquidity Utilization:</div>
-            <div className="Value">30.96%</div>
+            <div className="Value">
+              (
+              {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
+              %)
+            </div>
           </div>
         </div>
       </div>
