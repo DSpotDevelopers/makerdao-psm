@@ -115,7 +115,7 @@ const Main = () => {
   //
   const [trading, setTrading] = useState(false);
 
-  const circleState = +(!!inputValue) + trading;
+  const circleState = +(!!inputValue) + trading + (notification && notification.message === 'Transference finished successfully');
 
   useEffect(() => {
     if (!fees && !inputValue) {
@@ -206,7 +206,7 @@ const Main = () => {
         isBuying() ? inputValue : outputValue, account, provider);
 
       notify({
-        type: 'success',
+        type: 'Success',
         message: 'Transference finished successfully',
       });
       setTrading(false);
@@ -229,8 +229,15 @@ const Main = () => {
 
   // eslint-disable-next-line no-shadow
   const checkApproval = async (inputCurrency, outputCurrency, account) => {
-    const isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
-    setApproved(isApproved);
+    try {
+      const isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
+      setApproved(isApproved);
+    } catch (e) {
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
+    }
   };
 
   return (
