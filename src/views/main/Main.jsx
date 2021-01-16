@@ -84,7 +84,8 @@ const Main = () => {
 
   const handleClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
-    let tempInputCurrency, tempOutputCurrency;
+    let tempInputCurrency;
+    let tempOutputCurrency;
 
     if (isLeft) {
       tempInputCurrency = el;
@@ -97,7 +98,9 @@ const Main = () => {
     setInputCurrency(tempInputCurrency);
     setOutputCurrency(tempOutputCurrency);
 
+    // eslint-disable-next-line no-use-before-define
     if (account) {
+      // eslint-disable-next-line no-use-before-define
       await checkApproval(tempInputCurrency.name, tempOutputCurrency.name, account);
     }
   };
@@ -105,7 +108,7 @@ const Main = () => {
   const isBuying = () => {
     if (!outputCurrency) return false;
     return outputCurrency.name === 'DAI';
-  }
+  };
 
   //
   // Trade Logic
@@ -119,6 +122,7 @@ const Main = () => {
       setOutputValue(0.00);
       return;
     }
+    // eslint-disable-next-line no-mixed-operators
     const tempFee = inputValue * (isBuying() ? fees.tout : fees.tin) / 100;
     setOutputValue(inputValue - (isBuying() ? tempFee : 0));
     setFee(tempFee);
@@ -168,6 +172,7 @@ const Main = () => {
       setConnected(true);
       setProvider(tempProvider);
 
+      // eslint-disable-next-line no-use-before-define
       await checkApproval(inputCurrency.name, outputCurrency.name, accounts[0]);
 
       notify({
@@ -189,7 +194,7 @@ const Main = () => {
     if (!inputValue) {
       notify({
         type: 'Error',
-        message: "You should input how much you want to trade"
+        message: 'You should input how much you want to trade',
       });
       return;
     }
@@ -218,13 +223,15 @@ const Main = () => {
     if (!account) return;
 
     await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
+    // eslint-disable-next-line no-use-before-define
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
-  }
+  };
 
+  // eslint-disable-next-line no-shadow
   const checkApproval = async (inputCurrency, outputCurrency, account) => {
-    let isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
+    const isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
     setApproved(isApproved);
-  }
+  };
 
   return (
     <div className="MainContainer">
@@ -288,8 +295,9 @@ const Main = () => {
       <div className="NotificationsContainer">
         {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
-      <Button label={connected ? (approved ? "Trade" : "Approve") : "Connect"}
-              onClick={() => connected ? (approved ? trade() : approve()) : connect()} />
+      {/* eslint-disable-next-line max-len */}
+      {/* eslint-disable-next-line no-nested-ternary,react/jsx-first-prop-new-line,react/jsx-max-props-per-line */}
+      <Button label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'} onClick={() => (connected ? (approved ? trade() : approve()) : connect())} />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
