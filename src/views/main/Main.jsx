@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 import './Main.scss';
 import WalletConnectProvider from '@walletconnect/web3-provider';
@@ -40,9 +41,7 @@ const Main = () => {
   // PSM
   //
   const psmService = usePsmService();
-  // eslint-disable-next-line no-unused-vars
   const [stats, setStats] = useState(undefined);
-  // eslint-disable-next-line no-unused-vars
   const [fees, setFees] = useState(undefined);
 
   useEffect(async () => {
@@ -179,7 +178,6 @@ const Main = () => {
         message: 'Connected to wallet successfully',
       });
     } catch (e) {
-      // eslint-disable-next-line no-console
       notify({
         type: 'Error',
         message: e.message.toString(),
@@ -304,9 +302,10 @@ const Main = () => {
       <div className="NotificationsContainer">
         {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
-      {/* eslint-disable-next-line max-len */}
-      {/* eslint-disable-next-line no-nested-ternary,react/jsx-first-prop-new-line,react/jsx-max-props-per-line */}
-      <Button label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'} onClick={() => (connected ? (approved ? trade() : approve()) : connect())} />
+      <Button
+        label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
+        onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
+      />
       <div className="Copyright">
         <div>A Maker Community Project</div>
         <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
