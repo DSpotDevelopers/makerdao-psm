@@ -34,11 +34,13 @@
   .TradeContainer {
     display: block;
     margin-bottom: 58px;
-    .labels{
+
+    .labels {
       display: flex;
       width: 100%;
       flex: 1 1 auto;
       justify-content: space-around;
+
       .Label {
         text-align: center;
         font: normal normal 300 24px/32px Roboto;
@@ -49,9 +51,11 @@
         align-self: center;
       }
     }
-    .container{
+
+    .container {
       display: flex;
     }
+
     .Side {
       display: flex;
       flex-direction: column;
@@ -190,4 +194,15 @@
     }
   }
 
+  @media only screen and (max-width: 1800px) {
+    .LogoContainer {
+      margin-bottom: 30px;
+      img {
+        margin-bottom: 10px;
+      }
+    }
+    .TradeContainer, .NotificationsContainer, .InfoContainer {
+      margin-bottom: 20px;
+    }
+  }
 }
