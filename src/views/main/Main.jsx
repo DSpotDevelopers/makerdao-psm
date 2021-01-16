@@ -65,9 +65,6 @@ const Main = () => {
     setInputValue(value);
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const [showInfo, setShowInfo] = useState(true);
-
   //
   // Select values ang logic
   //
@@ -113,9 +110,11 @@ const Main = () => {
   //
   // Trade Logic
   //
-  const [trading, setTrading] = useState(false);
+  const [circleState, setCircleState] = useState(0);
 
-  const circleState = +(!!inputValue) + trading + (notification && notification.message === 'Transference finished successfully');
+  useEffect(() => {
+    setCircleState(+!!inputValue);
+  }, [inputValue]);
 
   useEffect(() => {
     if (!fees && !inputValue) {
@@ -199,7 +198,7 @@ const Main = () => {
       return;
     }
 
-    setTrading(true);
+    setCircleState(2);
 
     try {
       await psmService.trade(inputCurrency.name, outputCurrency.name,
@@ -209,9 +208,13 @@ const Main = () => {
         type: 'Success',
         message: 'Transference finished successfully',
       });
-      setTrading(false);
+      setCircleState(3);
+
+      setTimeout(() => {
+        setCircleState(1);
+      }, 3000);
     } catch (e) {
-      setTrading(false);
+      setCircleState(1);
       notify({
         type: 'Error',
         message: e.message.toString(),
@@ -279,10 +282,9 @@ const Main = () => {
             />
           </div>
         </div>
-
       </div>
       <div className="InfoContainer">
-        {showInfo && inputValue && fee && (
+        {inputValue && fee && (
           <Info img={InfoImg}>
             <div className="InfoData">
               <span>Fees:</span>
