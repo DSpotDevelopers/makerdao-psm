@@ -148,8 +148,8 @@ const Main = () => {
     return inputCurrency.name === 'DAI';
   };
 
-  const handleEntryChange = async ({ target: { value } }) => {
-    if (isBuyingGem()) {
+  const updateInputValue = (value, isBuying) => {
+    if (isBuying) {
       const toutDecimal = fees.tout / 100;
       const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
 
@@ -169,6 +169,10 @@ const Main = () => {
     } else {
       setInputValue(value);
     }
+  };
+
+  const handleInputValueChange = async ({ target: { value } }) => {
+    updateInputValue(value, isBuyingGem());
   };
 
   //
@@ -194,6 +198,9 @@ const Main = () => {
     if (account) {
       await checkApproval(tempInputCurrency.name, tempOutputCurrency.name, account);
     }
+
+    // Perform validations to the input value
+    updateInputValue(inputValue, tempInputCurrency.name === 'DAI');
   };
 
   //
@@ -235,7 +242,6 @@ const Main = () => {
     }
 
     try {
-      console.log(`Is Buying: ${isBuyingGem()}`);
       let tradedAmountUSDC;
       if (isBuyingGem()) {
         tradedAmountUSDC = inputValue * (1 - fees.tin / 100);
@@ -286,7 +292,7 @@ const Main = () => {
         <div className="container">
           <div className="Side Left">
             <div style={{ marginBottom: '16px' }}>
-              <Input left value={inputValue} onChange={handleEntryChange} />
+              <Input left value={inputValue} onChange={handleInputValueChange} />
             </div>
             <Select
               left
