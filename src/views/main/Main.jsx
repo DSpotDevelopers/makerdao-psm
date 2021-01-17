@@ -176,10 +176,10 @@ const Main = () => {
   };
 
   //
-  // Select values ang logic
+  // Select currencies logic
   //
 
-  const handleClick = async (el, isLeft) => {
+  const handleCurrencyClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
     let tempInputCurrency;
     let tempOutputCurrency;
@@ -298,7 +298,7 @@ const Main = () => {
               left
               value={inputCurrency}
               elements={currencies}
-              handleClick={handleClick}
+              handleClick={handleCurrencyClick}
             />
           </div>
           <div className="Center">
@@ -312,7 +312,7 @@ const Main = () => {
               right
               value={outputCurrency}
               elements={currencies}
-              handleClick={handleClick}
+              handleClick={handleCurrencyClick}
             />
           </div>
         </div>
