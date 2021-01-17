@@ -1,3 +1,5 @@
+// eslint-disable react/forbid-prop-types
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import './Input.scss';
@@ -8,14 +10,21 @@ const Input = ({
   const [focused, setFocused] = useState(false);
   return (
     <div className={`Input ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${focused ? 'Focused' : ''}`}>
-      <input type="number" value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder={placeholder} />
+      <input
+        type="number"
+        value={value}
+        step="0.01"
+        onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={placeholder}
+      />
     </div>
   );
 };
 
 Input.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  value: PropTypes.any,
+  value: PropTypes.string,
   right: PropTypes.bool,
   left: PropTypes.bool,
   onChange: PropTypes.func,

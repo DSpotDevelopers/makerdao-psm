@@ -10,7 +10,7 @@ const info = {
 
 export default info;
 
-// eslint-disable-next-line react/jsx-filename-extension,react/jsx-props-no-spreading
+// eslint-disable-next-line react/jsx-props-no-spreading
 const Template = (args) => <Select {...args} />;
 
 export const Default = Template.bind({});

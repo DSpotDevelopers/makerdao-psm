@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import imgWallet from '../../assets/wallet.svg';
 
 const ConnectButton = ({ onClick, connected, walletId }) => (
-  // eslint-disable-next-line jsx-a11y/no-static-element-interactions,jsx-a11y/click-events-have-key-events,no-return-await
-  <div className="ConnectButtonWrapper no-select" onClick={async () => await onClick()}>
+  // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+  <div className="ConnectButtonWrapper no-select" role="presentation" onClick={async () => onClick()}>
     <div className={`Gradient ${connected ? '' : 'Connecting'}`}>
       <img src={imgWallet} alt="wallet" className="img" />
     </div>

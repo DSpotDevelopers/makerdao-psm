@@ -7,13 +7,15 @@ import arrowUp from '../../assets/arrow-up.svg';
 const Select = ({
   right, left, value, elements, handleClick,
 }) => {
-  // eslint-disable-next-line no-unused-vars
   const [opened, setOpened] = useState(false);
   const toggleOpened = () => setOpened(!opened);
   const elementsToShow = elements.filter((x) => x.name !== value.name);
 
   return (
-    <div className={`SelectWrapper ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${opened ? 'Opened' : ''} no-select`} onMouseLeave={() => setOpened(false)}>
+    <div
+      className={`SelectWrapper ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${opened ? 'Opened' : ''} no-select`}
+      onMouseLeave={() => setOpened(false)}
+    >
       <div
         className={`Background ${left ? 'Left' : ''} ${right ? 'Right' : ''}`}
         style={{
@@ -22,20 +24,23 @@ const Select = ({
         }}
       />
       {left && <img className="ArrowLeft" src={arrowUp} alt="left" />}
-      {/* eslint-disable-next-line max-len */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-noninteractive-element-interactions */}
-      <div className={`Input Select ${left ? 'Left' : ''} ${right ? 'Right' : ''}`} onClick={toggleOpened} role="list">
+      <div
+        className={`Input Select ${left ? 'Left' : ''} ${right ? 'Right' : ''}`}
+        onClick={toggleOpened}
+        role="presentation"
+      >
         {value.image && <img className="Img" src={value.image} alt="currency" />}
         {value.name}
       </div>
       {opened && (
       <div className={`Options ${left ? 'Left' : ''} ${right ? 'Right' : ''}`}>
         {elementsToShow.map((el, i) => (
-          // eslint-disable-next-line max-len
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
           <div
             key={el.name}
+            aria-hidden
             className={`Input Select ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${i === elementsToShow.length - 1 ? 'Last' : ''}`}
+            role="menuitem"
             onClick={() => {
               setOpened(false);
               handleClick(el, left);
@@ -53,8 +58,7 @@ const Select = ({
 };
 
 Select.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  value: PropTypes.any,
+  value: PropTypes.string,
   left: PropTypes.bool,
   right: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types

@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 import './Main.scss';
 import WalletConnectProvider from '@walletconnect/web3-provider';
@@ -9,8 +8,8 @@ import ConnectButton from '../../components/connect-button/ConnectButton';
 import TransferButton from '../../components/transfer-button/TransferButton';
 import Input from '../../components/input/Input';
 import Select from '../../components/select/Select';
-import DaiImg from '../../assets/dai.png';
-import Usdc from '../../assets/usdc.png';
+import DAIImg from '../../assets/dai.png';
+import USDCImg from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
@@ -38,9 +37,89 @@ const Main = () => {
   };
 
   //
+  // Connection Logic
+  //
+  const [connected, setConnected] = useState(false);
+  const [account, setAccount] = useState(undefined);
+  const [provider, setProvider] = useState(undefined);
+
+  const [approved, setApproved] = useState(false);
+
+  // Currencies states
+  const currencies = [{
+    name: 'DAI',
+    image: DAIImg,
+  }, {
+    name: 'USDC',
+    image: USDCImg,
+  }];
+  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
+  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
+
+  const psmService = usePsmService();
+
+  const providerOptions = {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        infuraId: '994ffbdba376443ba4b5bb1e714467d1',
+      },
+    },
+  };
+
+  const web3Modal = new Web3Modal({
+    network: 'mainnet',
+    cacheProvider: false,
+    providerOptions,
+  });
+
+  web3Modal.clearCachedProvider();
+
+  const checkApproval = async (pInputCurrency, pOutputCurrency, pAccount) => {
+    try {
+      const isApproved = await psmService.isApproved(pInputCurrency, pOutputCurrency, pAccount);
+      setApproved(isApproved);
+    } catch (e) {
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
+    }
+  };
+
+  const connect = async () => {
+    if (connected) {
+      setConnected(false);
+      return;
+    }
+    const tempProvider = await web3Modal.connect();
+
+    const web3 = new Web3(tempProvider);
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+
+      setAccount(accounts[0]);
+      setConnected(true);
+      setProvider(tempProvider);
+
+      await checkApproval(inputCurrency.name, outputCurrency.name, accounts[0]);
+
+      notify({
+        type: 'Success',
+        message: 'Connected to wallet successfully',
+      });
+    } catch (e) {
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
+    }
+  };
+
+  //
   // PSM
   //
-  const psmService = usePsmService();
   const [stats, setStats] = useState(undefined);
   const [fees, setFees] = useState(undefined);
 
@@ -67,16 +146,6 @@ const Main = () => {
   //
   // Select values ang logic
   //
-  const currencies = [{
-    name: 'DAI',
-    image: DaiImg,
-  }, {
-    name: 'USDC',
-    image: Usdc,
-  }];
-
-  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
-  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
 
   const handleClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
@@ -94,9 +163,7 @@ const Main = () => {
     setInputCurrency(tempInputCurrency);
     setOutputCurrency(tempOutputCurrency);
 
-    // eslint-disable-next-line no-use-before-define
     if (account) {
-      // eslint-disable-next-line no-use-before-define
       await checkApproval(tempInputCurrency.name, tempOutputCurrency.name, account);
     }
   };
@@ -120,70 +187,22 @@ const Main = () => {
       setOutputValue(0.00);
       return;
     }
-    // eslint-disable-next-line no-mixed-operators
-    const tempFee = inputValue * (isBuying() ? fees.tout : fees.tin) / 100;
-    setOutputValue(inputValue - (isBuying() ? tempFee : 0));
-    setFee(tempFee);
+
+    let chargedFee;
+    if (isBuying()) {
+      // Determined from single equation outputValue = inputValue * (1 - tin)
+      chargedFee = (inputValue * fees.tin) / 100;
+    } else {
+      // Determined from equations system:
+      // inputValue - chargedFee = outputValue
+      // chargedFee = outputValue * tout;
+      const toutDecimal = fees.tout / 100;
+      chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
+    }
+
+    setOutputValue(inputValue - chargedFee);
+    setFee(chargedFee);
   }, [inputValue, inputCurrency]);
-
-  //
-  // Connection Logic
-  //
-  const [connected, setConnected] = useState(false);
-  const [approved, setApproved] = useState(false);
-
-  // eslint-disable-next-line no-unused-vars
-  const [account, setAccount] = useState(undefined);
-
-  const providerOptions = {
-    walletconnect: {
-      package: WalletConnectProvider,
-      options: {
-        infuraId: '994ffbdba376443ba4b5bb1e714467d1',
-      },
-    },
-  };
-
-  const web3Modal = new Web3Modal({
-    network: 'mainnet',
-    cacheProvider: false,
-    providerOptions,
-  });
-
-  web3Modal.clearCachedProvider();
-
-  const [provider, setProvider] = useState(undefined);
-
-  const connect = async () => {
-    if (connected) {
-      setConnected(false);
-      return;
-    }
-    const tempProvider = await web3Modal.connect();
-
-    const web3 = new Web3(tempProvider);
-
-    try {
-      const accounts = await web3.eth.getAccounts();
-
-      setAccount(accounts[0]);
-      setConnected(true);
-      setProvider(tempProvider);
-
-      // eslint-disable-next-line no-use-before-define
-      await checkApproval(inputCurrency.name, outputCurrency.name, accounts[0]);
-
-      notify({
-        type: 'Success',
-        message: 'Connected to wallet successfully',
-      });
-    } catch (e) {
-      notify({
-        type: 'Error',
-        message: e.message.toString(),
-      });
-    }
-  };
 
   const trade = async () => {
     if (!account) return;
@@ -199,8 +218,20 @@ const Main = () => {
     setCircleState(2);
 
     try {
+      let tradedAmountUSDC;
+      if (isBuying()) {
+        // Determined from single equation outputValue = inputValue * (1 - tin);
+        tradedAmountUSDC = inputValue * (1 - fees.tin / 100);
+      } else {
+        // Determined from equations system:
+        // inputValue - chargedFee = outputValue
+        // chargedFee = outputValue * tout;
+        const toutDecimal = fees.tout / 100;
+        tradedAmountUSDC = inputValue * (1 - toutDecimal / (1 + toutDecimal));
+      }
+
       await psmService.trade(inputCurrency.name, outputCurrency.name,
-        isBuying() ? inputValue : outputValue, account, provider);
+        tradedAmountUSDC, account, provider);
 
       notify({
         type: 'Success',
@@ -224,21 +255,7 @@ const Main = () => {
     if (!account) return;
 
     await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
-    // eslint-disable-next-line no-use-before-define
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
-  };
-
-  // eslint-disable-next-line no-shadow
-  const checkApproval = async (inputCurrency, outputCurrency, account) => {
-    try {
-      const isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
-      setApproved(isApproved);
-    } catch (e) {
-      notify({
-        type: 'Error',
-        message: e.message.toString(),
-      });
-    }
   };
 
   return (
@@ -303,12 +320,16 @@ const Main = () => {
         {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
       <Button
+        /* eslint-disable no-nested-ternary */
         label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
         onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
+        /* eslint-enable no-nested-ternary */
       />
       <div className="Copyright">
         <div>A Maker Community Project</div>
-        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
+        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">
+          Docs
+        </a>
       </div>
 
       <div className="Stats">
@@ -319,7 +340,7 @@ const Main = () => {
         </Info>
         <div className="StatsRow">
           <div className="Image">
-            <img src={Usdc} alt="usdc" />
+            <img src={USDCImg} alt="usdc" />
           </div>
           <div className="StatsInfo">
             <div className="Label">USDC:</div>
