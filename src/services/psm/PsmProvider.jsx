@@ -40,7 +40,7 @@ const getStats = async (provider = Web3.givenProvider) => {
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
   const ilk = await vatContract.methods.ilks(web3.utils.fromAscii('PSM-USDC-A')).call();
 
-  const used = (ilk.Art / RAD) * ilk.rate;
+  const used = (ilk.Art * ilk.rate) / RAD;
   const line = ilk.line / RAD;
 
   return {

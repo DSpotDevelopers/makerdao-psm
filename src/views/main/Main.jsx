@@ -21,6 +21,10 @@ function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+function decimalSeparator() {
+  return (1.1).toLocaleString().substring(1, 2);
+}
+
 const Main = () => {
   //
   // Notifications Logic
@@ -139,8 +143,32 @@ const Main = () => {
   const [outputValue, setOutputValue] = useState(0.00);
   const [fee, setFee] = useState(0.00);
 
+  const isBuyingGem = () => {
+    if (!inputCurrency) return false;
+    return inputCurrency.name === 'DAI';
+  };
+
   const handleEntryChange = async ({ target: { value } }) => {
-    setInputValue(value);
+    if (isBuyingGem()) {
+      const toutDecimal = fees.tout / 100;
+      const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
+
+      if (Number(value - chargedFee) > stats.used) {
+        setInputValue((stats.used + stats.used * toutDecimal).toFixed(2));
+        return;
+      }
+    } else if (Number(value) > stats.total - stats.used) {
+      setInputValue((stats.total - stats.used).toFixed(2));
+      return;
+    }
+
+    const dotSplit = value.split(decimalSeparator());
+    if (dotSplit.length > 1) {
+      // Permit only 2 decimal values
+      setInputValue(dotSplit[0] + decimalSeparator() + dotSplit[1].substr(0, 2));
+    } else {
+      setInputValue(value);
+    }
   };
 
   //
@@ -168,19 +196,10 @@ const Main = () => {
     }
   };
 
-  const isBuying = () => {
-    if (!outputCurrency) return false;
-    return outputCurrency.name === 'DAI';
-  };
-
   //
   // Trade Logic
   //
   const [circleState, setCircleState] = useState(0);
-
-  useEffect(() => {
-    setCircleState(+!!inputValue);
-  }, [inputValue]);
 
   useEffect(() => {
     if (!fees && !inputValue) {
@@ -189,15 +208,15 @@ const Main = () => {
     }
 
     let chargedFee;
-    if (isBuying()) {
-      // Determined from single equation outputValue = inputValue * (1 - tin)
-      chargedFee = (inputValue * fees.tin) / 100;
-    } else {
+    if (isBuyingGem()) {
       // Determined from equations system:
       // inputValue - chargedFee = outputValue
       // chargedFee = outputValue * tout;
       const toutDecimal = fees.tout / 100;
       chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
+    } else {
+      // Determined from single equation outputValue = inputValue * (1 - tin)
+      chargedFee = (inputValue * fees.tin) / 100;
     }
 
     setOutputValue(inputValue - chargedFee);
@@ -215,19 +234,13 @@ const Main = () => {
       return;
     }
 
-    setCircleState(2);
-
     try {
+      console.log(`Is Buying: ${isBuyingGem()}`);
       let tradedAmountUSDC;
-      if (isBuying()) {
-        // Determined from single equation outputValue = inputValue * (1 - tin);
+      if (isBuyingGem()) {
         tradedAmountUSDC = inputValue * (1 - fees.tin / 100);
       } else {
-        // Determined from equations system:
-        // inputValue - chargedFee = outputValue
-        // chargedFee = outputValue * tout;
-        const toutDecimal = fees.tout / 100;
-        tradedAmountUSDC = inputValue * (1 - toutDecimal / (1 + toutDecimal));
+        tradedAmountUSDC = inputValue;
       }
 
       await psmService.trade(inputCurrency.name, outputCurrency.name,
@@ -237,13 +250,13 @@ const Main = () => {
         type: 'Success',
         message: 'Transference finished successfully',
       });
-      setCircleState(3);
 
+      setCircleState(3);
       setTimeout(() => {
-        setCircleState(1);
+        setCircleState(0);
       }, 3000);
     } catch (e) {
-      setCircleState(1);
+      setCircleState(0);
       notify({
         type: 'Error',
         message: e.message.toString(),
@@ -287,7 +300,7 @@ const Main = () => {
           </div>
           <div className="Side Right">
             <div style={{ marginBottom: '16px' }}>
-              <Input right value={outputValue} />
+              <Input right value={outputValue.toFixed(2)} />
             </div>
             <Select
               right
