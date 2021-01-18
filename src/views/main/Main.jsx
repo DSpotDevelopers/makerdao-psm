@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 import './Main.scss';
 import WalletConnectProvider from '@walletconnect/web3-provider';
@@ -9,8 +8,8 @@ import ConnectButton from '../../components/connect-button/ConnectButton';
 import TransferButton from '../../components/transfer-button/TransferButton';
 import Input from '../../components/input/Input';
 import Select from '../../components/select/Select';
-import DaiImg from '../../assets/dai.png';
-import Usdc from '../../assets/usdc.png';
+import DAIImg from '../../assets/dai.png';
+import USDCImg from '../../assets/usdc.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
@@ -21,6 +20,11 @@ import Notification from '../../components/notification/Notification';
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
+
+function decimalSeparator() {
+  return (1.1).toLocaleString().substring(1, 2);
+}
+
 const Main = () => {
   //
   // Notifications Logic
@@ -37,9 +41,89 @@ const Main = () => {
   };
 
   //
+  // Connection Logic
+  //
+  const [connected, setConnected] = useState(false);
+  const [account, setAccount] = useState(undefined);
+  const [provider, setProvider] = useState(undefined);
+
+  const [approved, setApproved] = useState(false);
+
+  // Currencies states
+  const currencies = [{
+    name: 'DAI',
+    image: DAIImg,
+  }, {
+    name: 'USDC',
+    image: USDCImg,
+  }];
+  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
+  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
+
+  const psmService = usePsmService();
+
+  const providerOptions = {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        infuraId: '994ffbdba376443ba4b5bb1e714467d1',
+      },
+    },
+  };
+
+  const web3Modal = new Web3Modal({
+    network: 'mainnet',
+    cacheProvider: false,
+    providerOptions,
+  });
+
+  web3Modal.clearCachedProvider();
+
+  const checkApproval = async (pInputCurrency, pOutputCurrency, pAccount) => {
+    try {
+      const isApproved = await psmService.isApproved(pInputCurrency, pOutputCurrency, pAccount);
+      setApproved(isApproved);
+    } catch (e) {
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
+    }
+  };
+
+  const connect = async () => {
+    if (connected) {
+      setConnected(false);
+      return;
+    }
+    const tempProvider = await web3Modal.connect();
+
+    const web3 = new Web3(tempProvider);
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+
+      setAccount(accounts[0]);
+      setConnected(true);
+      setProvider(tempProvider);
+
+      await checkApproval(inputCurrency.name, outputCurrency.name, accounts[0]);
+
+      notify({
+        type: 'Success',
+        message: 'Connected to wallet successfully',
+      });
+    } catch (e) {
+      notify({
+        type: 'Error',
+        message: e.message.toString(),
+      });
+    }
+  };
+
+  //
   // PSM
   //
-  const psmService = usePsmService();
   const [stats, setStats] = useState(undefined);
   const [fees, setFees] = useState(undefined);
 
@@ -59,25 +143,43 @@ const Main = () => {
   const [outputValue, setOutputValue] = useState(0.00);
   const [fee, setFee] = useState(0.00);
 
-  const handleEntryChange = async ({ target: { value } }) => {
-    setInputValue(value);
+  const isBuyingGem = () => {
+    if (!inputCurrency) return false;
+    return inputCurrency.name === 'DAI';
+  };
+
+  const updateInputValue = (value, isBuying) => {
+    if (isBuying) {
+      const toutDecimal = fees.tout / 100;
+      const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
+
+      if (Number(value - chargedFee) > stats.used) {
+        setInputValue((stats.used + stats.used * toutDecimal).toFixed(2));
+        return;
+      }
+    } else if (Number(value) > stats.total - stats.used) {
+      setInputValue((stats.total - stats.used).toFixed(2));
+      return;
+    }
+
+    const dotSplit = value.split(decimalSeparator());
+    if (dotSplit.length > 1) {
+      // Permit only 2 decimal values
+      setInputValue(dotSplit[0] + decimalSeparator() + dotSplit[1].substr(0, 2));
+    } else {
+      setInputValue(value);
+    }
+  };
+
+  const handleInputValueChange = async ({ target: { value } }) => {
+    updateInputValue(value, isBuyingGem());
   };
 
   //
-  // Select values ang logic
+  // Select currencies logic
   //
-  const currencies = [{
-    name: 'DAI',
-    image: DaiImg,
-  }, {
-    name: 'USDC',
-    image: Usdc,
-  }];
 
-  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
-  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
-
-  const handleClick = async (el, isLeft) => {
+  const handleCurrencyClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
     let tempInputCurrency;
     let tempOutputCurrency;
@@ -93,16 +195,12 @@ const Main = () => {
     setInputCurrency(tempInputCurrency);
     setOutputCurrency(tempOutputCurrency);
 
-    // eslint-disable-next-line no-use-before-define
     if (account) {
-      // eslint-disable-next-line no-use-before-define
       await checkApproval(tempInputCurrency.name, tempOutputCurrency.name, account);
     }
-  };
 
-  const isBuying = () => {
-    if (!outputCurrency) return false;
-    return outputCurrency.name === 'DAI';
+    // Perform validations to the input value
+    updateInputValue(inputValue, tempInputCurrency.name === 'DAI');
   };
 
   //
@@ -111,78 +209,26 @@ const Main = () => {
   const [circleState, setCircleState] = useState(0);
 
   useEffect(() => {
-    setCircleState(+!!inputValue);
-  }, [inputValue]);
-
-  useEffect(() => {
     if (!fees && !inputValue) {
       setOutputValue(0.00);
       return;
     }
-    // eslint-disable-next-line no-mixed-operators
-    const tempFee = inputValue * (isBuying() ? fees.tout : fees.tin) / 100;
-    setOutputValue(inputValue - (isBuying() ? tempFee : 0));
-    setFee(tempFee);
+
+    let chargedFee;
+    if (isBuyingGem()) {
+      // Determined from equations system:
+      // inputValue - chargedFee = outputValue
+      // chargedFee = outputValue * tout;
+      const toutDecimal = fees.tout / 100;
+      chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
+    } else {
+      // Determined from single equation outputValue = inputValue * (1 - tin)
+      chargedFee = (inputValue * fees.tin) / 100;
+    }
+
+    setOutputValue(inputValue - chargedFee);
+    setFee(chargedFee);
   }, [inputValue, inputCurrency]);
-
-  //
-  // Connection Logic
-  //
-  const [connected, setConnected] = useState(false);
-  const [approved, setApproved] = useState(false);
-
-  // eslint-disable-next-line no-unused-vars
-  const [account, setAccount] = useState(undefined);
-
-  const providerOptions = {
-    walletconnect: {
-      package: WalletConnectProvider,
-      options: {
-        infuraId: '994ffbdba376443ba4b5bb1e714467d1',
-      },
-    },
-  };
-
-  const web3Modal = new Web3Modal({
-    network: 'mainnet',
-    cacheProvider: false,
-    providerOptions,
-  });
-
-  web3Modal.clearCachedProvider();
-
-  const [provider, setProvider] = useState(undefined);
-
-  const connect = async () => {
-    if (connected) {
-      setConnected(false);
-      return;
-    }
-    const tempProvider = await web3Modal.connect();
-
-    const web3 = new Web3(tempProvider);
-
-    try {
-      const accounts = await web3.eth.getAccounts();
-
-      setAccount(accounts[0]);
-      setConnected(true);
-      setProvider(tempProvider);
-
-      // eslint-disable-next-line no-use-before-define
-      await checkApproval(inputCurrency.name, outputCurrency.name, accounts[0]);
-
-      notify({
-        type: 'Success',
-        message: 'Connected to wallet successfully',
-      });
-    } catch (e) {
-      notify({
-        type: 'Error',
-        message: e.message.toString(),
-      });
-    }
-  };
 
   const trade = async () => {
     if (!account) return;
@@ -195,23 +241,28 @@ const Main = () => {
       return;
     }
 
-    setCircleState(2);
-
     try {
+      let tradedAmountUSDC;
+      if (isBuyingGem()) {
+        tradedAmountUSDC = inputValue * (1 - fees.tin / 100);
+      } else {
+        tradedAmountUSDC = inputValue;
+      }
+
       await psmService.trade(inputCurrency.name, outputCurrency.name,
-        isBuying() ? inputValue : outputValue, account, provider);
+        tradedAmountUSDC, account, provider);
 
       notify({
         type: 'Success',
         message: 'Transference finished successfully',
       });
-      setCircleState(3);
 
+      setCircleState(3);
       setTimeout(() => {
-        setCircleState(1);
+        setCircleState(0);
       }, 3000);
     } catch (e) {
-      setCircleState(1);
+      setCircleState(0);
       notify({
         type: 'Error',
         message: e.message.toString(),
@@ -223,21 +274,7 @@ const Main = () => {
     if (!account) return;
 
     await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
-    // eslint-disable-next-line no-use-before-define
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
-  };
-
-  // eslint-disable-next-line no-shadow
-  const checkApproval = async (inputCurrency, outputCurrency, account) => {
-    try {
-      const isApproved = await psmService.isApproved(inputCurrency, outputCurrency, account);
-      setApproved(isApproved);
-    } catch (e) {
-      notify({
-        type: 'Error',
-        message: e.message.toString(),
-      });
-    }
   };
 
   return (
@@ -255,13 +292,13 @@ const Main = () => {
         <div className="container">
           <div className="Side Left">
             <div style={{ marginBottom: '16px' }}>
-              <Input left value={inputValue} onChange={handleEntryChange} />
+              <Input left value={inputValue} onChange={handleInputValueChange} />
             </div>
             <Select
               left
               value={inputCurrency}
               elements={currencies}
-              handleClick={handleClick}
+              handleClick={handleCurrencyClick}
             />
           </div>
           <div className="Center">
@@ -269,13 +306,13 @@ const Main = () => {
           </div>
           <div className="Side Right">
             <div style={{ marginBottom: '16px' }}>
-              <Input right value={outputValue} />
+              <Input right value={outputValue.toFixed(2)} />
             </div>
             <Select
               right
               value={outputCurrency}
               elements={currencies}
-              handleClick={handleClick}
+              handleClick={handleCurrencyClick}
             />
           </div>
         </div>
@@ -302,12 +339,16 @@ const Main = () => {
         {notification && <Notification type={notification.type} value={notification.message} />}
       </div>
       <Button
+        /* eslint-disable no-nested-ternary */
         label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
         onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
+        /* eslint-enable no-nested-ternary */
       />
       <div className="Copyright">
         <div>A Maker Community Project</div>
-        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">Docs</a>
+        <a href="https://github.com/BellwoodStudios/dss-psm" target="_blank" rel="noreferrer">
+          Docs
+        </a>
       </div>
 
       <div className="Stats">
@@ -318,7 +359,7 @@ const Main = () => {
         </Info>
         <div className="StatsRow">
           <div className="Image">
-            <img src={Usdc} alt="usdc" />
+            <img src={USDCImg} alt="usdc" />
           </div>
           <div className="StatsInfo">
             <div className="Label">USDC:</div>

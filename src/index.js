@@ -1,7 +1,5 @@
-/* eslint-disable import/no-named-as-default-member */
-/* eslint-disable import/no-named-as-default */
-/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
+
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
@@ -9,12 +7,12 @@ import reportWebVitals from './reportWebVitals';
 import PsmProvider from './services/psm/PsmProvider';
 
 ReactDOM.render(
+  // eslint-disable-next-line react/jsx-filename-extension
   <React.StrictMode>
     <PsmProvider>
       <App />
     </PsmProvider>
   </React.StrictMode>,
-  // eslint-disable-next-line no-undef
   document.getElementById('root'),
 );
 

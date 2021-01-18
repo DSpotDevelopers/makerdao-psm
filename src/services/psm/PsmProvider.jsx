@@ -1,5 +1,4 @@
 import React, { createContext, useContext } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import PropTypes from 'prop-types';
 import Web3 from 'web3';
 import PsmAbi from './abi/PSM.json';
@@ -41,7 +40,7 @@ const getStats = async (provider = Web3.givenProvider) => {
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
   const ilk = await vatContract.methods.ilks(web3.utils.fromAscii('PSM-USDC-A')).call();
 
-  const used = (ilk.Art / RAD) * ilk.rate;
+  const used = (ilk.Art * ilk.rate) / RAD;
   const line = ilk.line / RAD;
 
   return {
@@ -91,8 +90,8 @@ const approve = async (from, to, account, provider = Web3.givenProvider) => {
 const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
   const [operation, amount] = isBuying(from, to)
-    ? [psmContract.methods.buyGem, pAmount * USDC_DECIMALS]
-    : [psmContract.methods.sellGem, pAmount * USDC_DECIMALS];
+    ? [psmContract.methods.buyGem, Math.trunc(pAmount * USDC_DECIMALS)]
+    : [psmContract.methods.sellGem, Math.trunc(pAmount * USDC_DECIMALS)];
 
   await operation(account, amount.toString()).send({ from: account });
 };
