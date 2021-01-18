@@ -27,8 +27,8 @@
     border-radius: 8px;
     position: absolute;
     content: '';
-    width: 320px;
-    height: 72px;
+    width: 100%;
+    height: 100%;
     background: rgba(255, 255, 255, .3);
     opacity: 0;
     transition: opacity .3s ease;
@@ -48,5 +48,13 @@
     position: absolute;
     right: 20px;
     top:  10px;
+  }
+}
+
+@media only screen and (max-width: 1500px) {
+  .Button {
+    width: 244px;
+    height: 57px;
+    font: normal normal bold 25px/33px Roboto;
   }
 }

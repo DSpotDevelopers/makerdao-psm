@@ -43,6 +43,40 @@
   }
 
   &.Fulfilled {
-    background: url("../../assets/transfer-success.svg");
+    background-image: url("../../assets/transfer-success.svg");
+  }
+}
+
+@media only screen and (max-width: 1500px) {
+  .TransferButton {
+    width: 70px;
+    height: 70px;
+    background-size: 100%;
+
+    .img {
+      width: 16px;
+      height: 25px;
+
+      &.img1 {
+        left: 25px;
+      }
+
+      &.img2 {
+        left: 40px;
+      }
+    }
+
+    &.Hovered, &.Clicked {
+      .img2 {
+        left: 50px;
+      }
+    }
+
+    &.Clicked {
+      .img1 {
+        left: 35px;
+      }
+    }
+
   }
 }

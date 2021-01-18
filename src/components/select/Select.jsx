@@ -2,22 +2,30 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import '../input/Input.scss';
 import './Select.scss';
+import { useWindowWidth } from '@react-hook/window-size';
 import arrowUp from '../../assets/arrow-up.svg';
 
 const Select = ({
   right, left, value, elements, handleClick,
 }) => {
+  //
+  // Windows Width
+  //
+
   // eslint-disable-next-line no-unused-vars
   const [opened, setOpened] = useState(false);
   const toggleOpened = () => setOpened(!opened);
   const elementsToShow = elements.filter((x) => x.name !== value.name);
+
+  const windowWidth = useWindowWidth();
+  const itemHeight = windowWidth <= 1500 ? 50 : 64;
 
   return (
     <div className={`SelectWrapper ${left ? 'Left' : ''} ${right ? 'Right' : ''} ${opened ? 'Opened' : ''} no-select`} onMouseLeave={() => setOpened(false)}>
       <div
         className={`Background ${left ? 'Left' : ''} ${right ? 'Right' : ''}`}
         style={{
-          height: !opened ? '64px' : `${64 + 64 * elementsToShow.length}px`,
+          height: !opened ? `${itemHeight}px` : `${itemHeight + itemHeight * elementsToShow.length}px`,
           top: '0',
         }}
       />

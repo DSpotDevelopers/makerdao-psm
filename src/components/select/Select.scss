@@ -12,13 +12,14 @@
     left: 50px;
   }
 
-  &:hover,&.Opened {
+  &:hover, &.Opened {
     .Background {
       &.Left, &.Right {
         width: 360px;
       }
+
       border-radius: 32px;
-      background: rgba(255, 255, 255 ,.1) !important;
+      background: rgba(255, 255, 255, .1) !important;
 
       &.Left {
         left: -16px;
@@ -131,14 +132,17 @@
 
     &.Left {
       left: 22px;
+
       .Input {
         &:before {
           left: -38px;
         }
       }
     }
+
     &.Right {
       right: 22px;
+
       .Input {
         &:before {
           left: 38px;
@@ -170,6 +174,67 @@
       &:hover {
         &:before {
           background: rgba(255, 255, 255, .5);
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 1500px) {
+  .SelectWrapper {
+    &.Right {
+      left: 10px;
+    }
+
+    &.Left {
+      right: 10px;
+    }
+
+    &:hover, &.Opened {
+      .Background {
+        height: 50px;
+
+        &.Left, &.Right {
+          width: 320px;
+          height: 50px;
+        }
+      }
+    }
+
+    .Background {
+      height: 50px;
+    }
+
+    .Options {
+      top: 50px;
+      .Input {
+        width: 100%;
+        border-radius: 0;
+        position: relative;
+
+        &.Last {
+          &:before {
+            border-radius: 0 0 32px 32px;
+          }
+        }
+
+        &.Right:before {
+          left: 78px;
+        }
+
+        &:before {
+          content: '';
+          height: 50px;
+          width: 320px;
+        }
+      }
+    }
+
+    .Select {
+      &.Input {
+        .Img {
+          width: 35px;
+          height: 35px;
         }
       }
     }

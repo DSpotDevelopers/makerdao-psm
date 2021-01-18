@@ -21,7 +21,6 @@ import Notification from '../../components/notification/Notification';
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
-
 const Main = () => {
   //
   // Notifications Logic

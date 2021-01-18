@@ -1,12 +1,21 @@
+body{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
+}
+
 .MainContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
 
-  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
   width: 100%;
-  min-height: 100vh;
+  margin: auto 0;
 
   .LogoContainer {
     display: block;
@@ -131,8 +140,8 @@
     display: flex;
     flex-direction: column;
     position: absolute;
-    right: 40px;
-    margin-top: -150px;
+    top: 0;
+    right: -480px;
 
     .Input {
       margin-left: 0;
@@ -189,12 +198,6 @@
   }
 
   @media only screen and (max-width: 1800px) {
-    .Stats {
-      display: none;
-    }
-  }
-
-  @media only screen and (max-width: 1800px) {
     .LogoContainer {
       margin-bottom: 30px;
       img {
@@ -206,3 +209,55 @@
     }
   }
 }
+
+@media only screen and (max-width: 1500px) {
+  .MainContainer {
+    .LogoContainer {
+      font-size: 24px;
+      img {
+        width: 65px;
+        height: 47px;
+      }
+    }
+
+    .TradeContainer {
+      .Center {
+        width: 122px;
+      }
+      .labels {
+        .Label {
+          font: normal normal 300 20px/26px Roboto;
+        }
+      }
+    }
+
+    .InfoContainer {
+      .Input.Info {
+        width: 340px;
+
+        .InfoData {
+          span {
+            font: normal normal bold 19px/25px Roboto;
+          }
+        }
+        .Img {
+          width: 35px;
+          height: 35px;
+        }
+      }
+    }
+
+    .Button {
+      margin-bottom: 0;
+    }
+
+    .Copyright {
+      display: none;
+    }
+
+    .Stats {
+      right: -350px;
+    }
+  }
+}
+
