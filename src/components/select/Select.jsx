@@ -8,10 +8,6 @@ import arrowUp from '../../assets/arrow-up.svg';
 const Select = ({
   right, left, value, elements, handleClick,
 }) => {
-  //
-  // Windows Width
-  //
-
   // eslint-disable-next-line no-unused-vars
   const [opened, setOpened] = useState(false);
   const toggleOpened = () => setOpened(!opened);
