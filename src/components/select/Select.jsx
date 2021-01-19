@@ -13,7 +13,7 @@ const Select = ({
   const elementsToShow = elements.filter((x) => x.name !== value.name);
 
   const windowWidth = useWindowWidth();
-  const itemHeight = windowWidth <= 1500 ? 50 : 64;
+  const itemHeight = windowWidth <= 1600 ? 50 : 64;
 
   return (
     <div
