@@ -149,6 +149,11 @@ const Main = () => {
   };
 
   const updateInputValue = (value, isBuying) => {
+    if (!value) {
+      setInputValue(undefined);
+      return;
+    }
+
     if (isBuying) {
       const toutDecimal = fees.tout / 100;
       const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
@@ -209,7 +214,7 @@ const Main = () => {
   const [circleState, setCircleState] = useState(0);
 
   useEffect(() => {
-    if (!fees && !inputValue) {
+    if (!fees || !inputValue) {
       setOutputValue(0.00);
       return;
     }
