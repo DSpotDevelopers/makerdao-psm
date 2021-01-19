@@ -2,7 +2,6 @@ body{
   display: flex;
   background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
   width: 100vw;
-  overflow-x: hidden;
 }
 
 .MainWrapper {
@@ -11,12 +10,8 @@ body{
   justify-content: center;
   position: relative;
   width: 100vw;
-  min-height: calc(100vh - 137px);
+  min-height: 100vh;
   overflow: hidden;
-  
-  @media only screen and (max-width: 1600px) {
-    min-height: 100vh;
-  }
 }
 
 .MainContainer {
