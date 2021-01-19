@@ -1,27 +1,33 @@
 body{
   display: flex;
+  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
+  width: 100vw;
+  overflow-x: hidden;
 }
+
 .MainWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
   position: relative;
   width: 100vw;
-  min-height: 100vh;
+  min-height: calc(100vh - 137px);
+  overflow: hidden;
   
   @media only screen and (max-width: 1500px) {
-    min-height: calc(100vh + 137px);
+    min-height: 100vh;
   }
 }
+
 .MainContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 
-  width: 100%;
+  width: 100vw;
   margin: auto 0;
 
   .LogoContainer {
@@ -83,8 +89,6 @@ body{
       &.Right {
         align-items: flex-start;
       }
-
-
     }
 
     .Center {
@@ -135,7 +139,7 @@ body{
     flex-direction: column;
     position: absolute;
     top: 0;
-    right: -480px;
+    right: 0;
 
     .Input {
       margin-left: 0;
@@ -210,10 +214,6 @@ body{
   align-items: center;
   justify-content: center;
 
-  position: absolute;
-  bottom: 0;
-  left: 0;
-
   text-align: center;
   font: normal normal 300 18px/24px Roboto;
   color: rgba(255, 255, 255, .3);
@@ -256,6 +256,7 @@ body{
     .InfoContainer {
       .Input.Info {
         width: 340px;
+        padding-left: 60px;
 
         .InfoData {
           span {
@@ -272,10 +273,5 @@ body{
     .Button {
       margin-bottom: 0;
     }
-
-    .Stats {
-      right: -350px;
-    }
   }
 }
-

@@ -278,102 +278,104 @@ const Main = () => {
   };
 
   return (
-    <div className="MainWrapper">
-      <div className="MainContainer">
-        <div className="LogoContainer">
-          <img src={logo} alt="Logo" />
-          <div>PSM</div>
-        </div>
-        <ConnectButton onClick={connect} connected={connected} walletId={account} />
-        <div className="TradeContainer">
-          <div className="labels">
-            <span className="Label">From</span>
-            <span className="Label">To</span>
+    <>
+      <div className="MainWrapper">
+        <div className="MainContainer">
+          <div className="LogoContainer">
+            <img src={logo} alt="Logo" />
+            <div>PSM</div>
           </div>
-          <div className="container">
-            <div className="Side Left">
-              <div style={{ marginBottom: '16px' }}>
-                <Input left value={inputValue} onChange={handleInputValueChange} />
-              </div>
-              <Select
-                left
-                value={inputCurrency}
-                elements={currencies}
-                handleClick={handleCurrencyClick}
-              />
+          <ConnectButton onClick={connect} connected={connected} walletId={account} />
+          <div className="TradeContainer">
+            <div className="labels">
+              <span className="Label">From</span>
+              <span className="Label">To</span>
             </div>
-            <div className="Center">
-              <TransferButton circleState={circleState} />
-            </div>
-            <div className="Side Right">
-              <div style={{ marginBottom: '16px' }}>
-                <Input right value={outputValue.toFixed(2)} />
+            <div className="container">
+              <div className="Side Left">
+                <div style={{ marginBottom: '16px' }}>
+                  <Input left value={inputValue} onChange={handleInputValueChange} />
+                </div>
+                <Select
+                  left
+                  value={inputCurrency}
+                  elements={currencies}
+                  handleClick={handleCurrencyClick}
+                />
               </div>
-              <Select
-                right
-                value={outputCurrency}
-                elements={currencies}
-                handleClick={handleCurrencyClick}
-              />
+              <div className="Center">
+                <TransferButton circleState={circleState} />
+              </div>
+              <div className="Side Right">
+                <div style={{ marginBottom: '16px' }}>
+                  <Input right value={outputValue.toFixed(2)} />
+                </div>
+                <Select
+                  right
+                  value={outputCurrency}
+                  elements={currencies}
+                  handleClick={handleCurrencyClick}
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="InfoContainer">
-          {inputValue && fee && (
-            <Info img={InfoImg}>
-              <div className="InfoData">
-                <span>Fees:</span>
-                {' '}
-                <span className="Data">
-                  $
-                  {fee.toFixed(2)}
+          <div className="InfoContainer">
+            {inputValue && fee && (
+              <Info img={InfoImg}>
+                <div className="InfoData">
+                  <span>Fees:</span>
                   {' '}
-                  / (
-                  {fees.tin}
-                  %)
-                </span>
+                  <span className="Data">
+                    $
+                    {fee.toFixed(2)}
+                    {' '}
+                    / (
+                    {fees.tin}
+                    %)
+                  </span>
+                </div>
+              </Info>
+            )}
+          </div>
+          <div className="NotificationsContainer">
+            {notification && <Notification type={notification.type} value={notification.message} />}
+          </div>
+          <Button
+            /* eslint-disable no-nested-ternary */
+            label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
+            onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
+            /* eslint-enable no-nested-ternary */
+          />
+
+          <div className="Stats">
+            <Info img={StatsImg} left>
+              <div className="StatsText">
+                Currency Reserves
               </div>
             </Info>
-          )}
-        </div>
-        <div className="NotificationsContainer">
-          {notification && <Notification type={notification.type} value={notification.message} />}
-        </div>
-        <Button
-          /* eslint-disable no-nested-ternary */
-          label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
-          onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
-          /* eslint-enable no-nested-ternary */
-        />
-
-        <div className="Stats">
-          <Info img={StatsImg} left>
-            <div className="StatsText">
-              Currency Reserves
-            </div>
-          </Info>
-          <div className="StatsRow">
-            <div className="Image">
-              <img src={USDCImg} alt="usdc" />
-            </div>
-            <div className="StatsInfo">
-              <div className="Label">USDC:</div>
-              <div className="Value">
-                {stats && stats.used && numberWithCommas(stats.used.toFixed(2))}
-                {' '}
-                (
-                {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
-                %)
+            <div className="StatsRow">
+              <div className="Image">
+                <img src={USDCImg} alt="usdc" />
+              </div>
+              <div className="StatsInfo">
+                <div className="Label">USDC:</div>
+                <div className="Value">
+                  {stats && stats.used && numberWithCommas(stats.used.toFixed(2))}
+                  {' '}
+                  (
+                  {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
+                  %)
+                </div>
               </div>
             </div>
-          </div>
-          <div className="StatsRow">
-            <div className="StatsInfo">
-              <div className="Label">Liquidity Utilization:</div>
-              <div className="Value">
-                (
-                {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
-                %)
+            <div className="StatsRow">
+              <div className="StatsInfo">
+                <div className="Label">Liquidity Utilization:</div>
+                <div className="Value">
+                  (
+                  {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
+                  %)
+                </div>
               </div>
             </div>
           </div>
@@ -399,7 +401,7 @@ const Main = () => {
           </a>
         </span>
       </div>
-    </div>
+    </>
   );
 };
 
