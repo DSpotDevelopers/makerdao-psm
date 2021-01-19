@@ -379,7 +379,7 @@ const Main = () => {
           </div>
         </div>
       </div>
-      <div className="Copyright">
+      <div className="Footer">
         <div>
           A
           {' '}
