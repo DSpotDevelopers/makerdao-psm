@@ -1,10 +1,17 @@
 body{
   display: flex;
-  flex-direction: column;
+  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
+  width: 100vw;
+}
+
+.MainWrapper {
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background: transparent radial-gradient(closest-side at 50% 50%, #1C3138 0%, #151F2D 100%) 0% 0% no-repeat padding-box;
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 .MainContainer {
@@ -13,8 +20,9 @@ body{
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 
-  width: 100%;
+  width: 100vw;
   margin: auto 0;
 
   .LogoContainer {
@@ -76,8 +84,6 @@ body{
       &.Right {
         align-items: flex-start;
       }
-
-
     }
 
     .Center {
@@ -123,25 +129,12 @@ body{
     margin-bottom: 61px;
   }
 
-  .Copyright {
-    text-align: center;
-    font: normal normal 300 18px/24px Roboto;
-    color: rgba(255, 255, 255, .3);
-    display: block;
-
-    a {
-      margin-left: 10px;
-      color: white;
-      text-decoration: none;
-    }
-  }
-
   .Stats {
     display: flex;
     flex-direction: column;
     position: absolute;
     top: 0;
-    right: -480px;
+    right: 0;
 
     .Input {
       margin-left: 0;
@@ -210,7 +203,31 @@ body{
   }
 }
 
-@media only screen and (max-width: 1500px) {
+.Footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  font: normal normal 300 18px/24px Roboto;
+  color: rgba(255, 255, 255, .3);
+  height: 137px;
+  width: 100vw;
+  background: rgba(0, 0, 0, .2);
+
+  span {
+    margin-top: 15px;
+  }
+
+  a {
+    margin: 0 10px;
+    color: white;
+    text-decoration: none;
+  }
+}
+
+@media only screen and (max-width: 1600px) {
   .MainContainer {
     .LogoContainer {
       font-size: 24px;
@@ -234,6 +251,7 @@ body{
     .InfoContainer {
       .Input.Info {
         width: 340px;
+        padding-left: 60px;
 
         .InfoData {
           span {
@@ -250,14 +268,5 @@ body{
     .Button {
       margin-bottom: 0;
     }
-
-    .Copyright {
-      display: none;
-    }
-
-    .Stats {
-      right: -350px;
-    }
   }
 }
-
