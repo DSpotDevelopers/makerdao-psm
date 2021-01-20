@@ -1,0 +1,33 @@
+.Notification {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: fit-content;
+  height: 42px;
+  border-radius: 21px;
+
+  font: normal normal 300 18px/24px Roboto;
+  letter-spacing: 0;
+  padding: 0 21px;
+
+  background: rgba(255, 255, 255, .3) 0 0 no-repeat padding-box;
+  color: white;
+
+  &.Error {
+    padding-left: 0;
+    background: rgba(255, 126, 126, .3) 0 0 no-repeat padding-box;
+    color: #FF6D6D;
+  }
+
+  &.Success {
+    background: rgba(132, 255, 198, .3) 0 0 no-repeat padding-box;
+    color: #4BFFAC;
+  }
+
+  .Img {
+    width: 32px;
+    height: 32px;
+    margin-left: 5px;
+    margin-right: 16px;
+  }
+}
