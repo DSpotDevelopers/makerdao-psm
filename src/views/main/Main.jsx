@@ -335,7 +335,7 @@ const Main = () => {
                     {fee.toFixed(2)}
                     {' '}
                     / (
-                    {fees.tin}
+                    {isBuyingGem() ? fees.tout : fees.tin}
                     %)
                   </span>
                 </div>
