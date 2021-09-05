@@ -8,8 +8,17 @@ import ERC20Abi from './abi/ERC20.json';
 const Tokens = {
   DAI: 'DAI',
   USDC: 'USDC',
+  PAX: 'PAX',
 };
-
+const PSMTokens = [
+  {
+    psmToken: 'PSM-USDC-A',
+    nameToken: 'USDC',
+  }, {
+    psmToken: 'PSM-PAX-A',
+    nameToken: 'PAX',
+  },
+];
 const ABIs = {
   ERC20: ERC20Abi,
   PSM: PsmAbi,
@@ -19,6 +28,7 @@ const ABIs = {
 const Addresses = {
   DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
   USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  PAX: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
   PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
   GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
   VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
@@ -36,18 +46,31 @@ const buildContract = (abi, address, provider = Web3.givenProvider) => {
 };
 
 const getStats = async (provider = Web3.givenProvider) => {
+  // const tokenIls = 'PSM-USDC-A';
+
   const web3 = new Web3(provider);
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
-  const ilk = await vatContract.methods.ilks(web3.utils.fromAscii('PSM-USDC-A')).call();
+  // eslint-disable-next-line max-len
+  const ilksArray = PSMTokens.map((tokenIlk) => vatContract.methods.ilks(web3.utils.fromAscii(tokenIlk.psmToken)).call());
 
-  const used = (ilk.Art * ilk.rate) / RAD;
-  const line = ilk.line / RAD;
+  const ilks = await Promise.all(ilksArray);
 
-  return {
-    used,
-    usedPercent: (used * 100) / line,
-    total: line,
-  };
+  const ilksExtracted = ilks.reduce((accumulator, ilk, index) => {
+    const used = (ilk.Art * ilk.rate) / RAD;
+    const line = ilk.line / RAD;
+    const extractedData = {
+      used,
+      usedPercent: (used * 100) / line,
+      total: line,
+    };
+
+    return ({
+      ...accumulator,
+      [PSMTokens[index].nameToken]: extractedData,
+    });
+  }, {});
+
+  return ilksExtracted;
 };
 
 const getFees = async (provider = Web3.givenProvider) => {
@@ -81,8 +104,9 @@ const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
   const [contract, approvalAddress, approvalAmount] = isBuying(from, to)
     ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM, MAX_APPROVAL_AMOUNT]
-    : [buildContract(ABIs.ERC20, Addresses.USDC, provider),
-      Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
+    : [buildContract(ABIs.ERC20, Addresses[Tokens[from]], provider),
+    // eslint-disable-next-line indent
+    Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
 
   return contract.methods.approve(approvalAddress, approvalAmount).send({ from: account });
 };
@@ -143,7 +167,7 @@ PsmProvider.defaultProps = {
   getStats,
   getFees,
   validGems: [Tokens.USDC],
-  lockedOf: () => {},
+  lockedOf: () => { },
 };
 
 export default PsmProvider;

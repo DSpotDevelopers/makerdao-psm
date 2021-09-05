@@ -10,6 +10,7 @@ import Input from '../../components/input/Input';
 import Select from '../../components/select/Select';
 import DAIImg from '../../assets/dai.png';
 import USDCImg from '../../assets/usdc.png';
+import PAXImg from '../../assets/pax.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
@@ -56,7 +57,12 @@ const Main = () => {
   }, {
     name: 'USDC',
     image: USDCImg,
-  }];
+  },
+  {
+    name: 'PAX',
+    image: PAXImg,
+  },
+  ];
   const [inputCurrency, setInputCurrency] = useState(currencies[0]);
   const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
 
@@ -124,7 +130,7 @@ const Main = () => {
   //
   // PSM
   //
-  const [stats, setStats] = useState(undefined);
+  const [stats, setStats] = useState({});
   const [fees, setFees] = useState(undefined);
 
   useEffect(async () => {
@@ -143,27 +149,32 @@ const Main = () => {
   const [outputValue, setOutputValue] = useState(0.00);
   const [fee, setFee] = useState(0.00);
 
-  const isBuyingGem = () => {
+  const getOriginCurrency = () => {
     if (!inputCurrency) return false;
-    return inputCurrency.name === 'DAI';
+    return inputCurrency.name;
   };
+
+  const isBuyingGem = () => getOriginCurrency() === 'DAI';
 
   const updateInputValue = (value, isBuying) => {
     if (!value) {
       setInputValue(undefined);
       return;
     }
+    const currencyData = stats[getOriginCurrency()];
+    const usedCurrency = currencyData.used;
+    const totalCurrency = currencyData.total;
 
     if (isBuying) {
       const toutDecimal = fees.tout / 100;
       const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
 
-      if (Number(value - chargedFee) > stats.used) {
-        setInputValue((stats.used + stats.used * toutDecimal).toFixed(2));
+      if (Number(value - chargedFee) > usedCurrency) {
+        setInputValue((usedCurrency + usedCurrency * toutDecimal).toFixed(2));
         return;
       }
-    } else if (Number(value) > stats.total - stats.used) {
-      setInputValue((stats.total - stats.used).toFixed(2));
+    } else if (Number(value) > totalCurrency - usedCurrency) {
+      setInputValue((totalCurrency - usedCurrency).toFixed(2));
       return;
     }
 
@@ -282,6 +293,18 @@ const Main = () => {
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
   };
 
+  const [totalPercentage, setTotalPercentage] = useState(null);
+
+  useEffect(() => {
+    const totalUsed = Object.values(stats)
+      .reduce((accumulator, item) => accumulator + item.used, 0);
+
+    const totalLine = Object.values(stats)
+      .reduce((accumulator, item) => accumulator + item.total, 0);
+
+    setTotalPercentage((totalUsed * 100) / totalLine);
+  }, [stats]);
+
   return (
     <>
       <div className="MainWrapper">
@@ -349,7 +372,7 @@ const Main = () => {
             /* eslint-disable no-nested-ternary */
             label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
             onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
-            /* eslint-enable no-nested-ternary */
+          /* eslint-enable no-nested-ternary */
           />
 
           <div className="Stats">
@@ -358,31 +381,48 @@ const Main = () => {
                 Currency Reserves
               </div>
             </Info>
-            <div className="StatsRow">
-              <div className="Image">
-                <img src={USDCImg} alt="usdc" />
-              </div>
-              <div className="StatsInfo">
-                <div className="Label">USDC:</div>
-                <div className="Value">
-                  {stats && stats.used && numberWithCommas(stats.used.toFixed(2))}
-                  {' '}
-                  (
-                  {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
-                  %)
+            <>
+              {
+                Object.keys(stats).map((key) => {
+                  const stat = stats[key];
+                  const imageCurrency = currencies.find((item) => item.name === key)?.image;
+
+                  if (stat?.used && stat?.usedPercent && imageCurrency) {
+                    return (
+                      <div className="StatsRow" key={key}>
+                        <div className="Image">
+                          <img src={imageCurrency} alt={key.toLowerCase()} />
+                        </div>
+                        <div className="StatsInfo">
+                          <div className="Label">{`${key}:`}</div>
+                          <div className="Value">
+                            {stat.used && numberWithCommas(stat.used.toFixed(2))}
+                            {' '}
+                            (
+                            {stat.usedPercent && stat.usedPercent.toFixed(2)}
+                            %)
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })
+              }
+            </>
+            {totalPercentage && (
+              <div className="StatsRow">
+                <div className="StatsInfo">
+                  <div className="Label">Liquidity Utilization:</div>
+                  <div className="Value">
+                    (
+                    {totalPercentage.toFixed(2)}
+                    %)
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="StatsRow">
-              <div className="StatsInfo">
-                <div className="Label">Liquidity Utilization:</div>
-                <div className="Value">
-                  (
-                  {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
-                  %)
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
