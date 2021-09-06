@@ -293,6 +293,7 @@ const Main = () => {
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const [totalPercentage, setTotalPercentage] = useState(null);
 
   useEffect(() => {
@@ -302,7 +303,11 @@ const Main = () => {
     const totalLine = Object.values(stats)
       .reduce((accumulator, item) => accumulator + item.total, 0);
 
-    setTotalPercentage((totalUsed * 100) / totalLine);
+    if (totalLine > 0) {
+      const percentageTotal = (totalUsed * 100) / totalLine;
+
+      setTotalPercentage(percentageTotal);
+    }
   }, [stats]);
 
   return (
