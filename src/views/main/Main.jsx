@@ -162,8 +162,8 @@ const Main = () => {
       return;
     }
     const currencyData = stats[getOriginCurrency()];
-    const usedCurrency = currencyData.used;
-    const totalCurrency = currencyData.total;
+    const usedCurrency = currencyData?.used;
+    const totalCurrency = currencyData?.total;
 
     if (isBuying) {
       const toutDecimal = fees.tout / 100;

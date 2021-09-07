@@ -62,7 +62,8 @@ const Select = ({
 };
 
 Select.propTypes = {
-  value: PropTypes.string,
+  // eslint-disable-next-line react/forbid-prop-types
+  value: PropTypes.any,
   left: PropTypes.bool,
   right: PropTypes.bool,
   // eslint-disable-next-line react/forbid-prop-types
