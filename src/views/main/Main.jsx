@@ -18,6 +18,19 @@ import InfoImg from '../../assets/hand.svg';
 import { usePsmService } from '../../services/psm/PsmProvider';
 import Notification from '../../components/notification/Notification';
 
+const currencies = [{
+  name: 'DAI',
+  image: DAIImg,
+}, {
+  name: 'USDC',
+  image: USDCImg,
+},
+{
+  name: 'PAX',
+  image: PAXImg,
+},
+];
+
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
@@ -27,6 +40,8 @@ function decimalSeparator() {
 }
 
 const Main = () => {
+  const psmService = usePsmService();
+
   //
   // Notifications Logic
   //
@@ -41,6 +56,10 @@ const Main = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // Currencies states
+  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
+  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
+
   //
   // Connection Logic
   //
@@ -49,24 +68,6 @@ const Main = () => {
   const [provider, setProvider] = useState(undefined);
 
   const [approved, setApproved] = useState(false);
-
-  // Currencies states
-  const currencies = [{
-    name: 'DAI',
-    image: DAIImg,
-  }, {
-    name: 'USDC',
-    image: USDCImg,
-  },
-  {
-    name: 'PAX',
-    image: PAXImg,
-  },
-  ];
-  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
-  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
-
-  const psmService = usePsmService();
 
   const providerOptions = {
     walletconnect: {
@@ -127,11 +128,14 @@ const Main = () => {
     }
   };
 
-  //
-  // PSM
-  //
+  /**
+   * Stats and Fees section
+   */
   const [stats, setStats] = useState({});
-  const [fees, setFees] = useState(undefined);
+  const [fees, setFees] = useState();
+
+  const [statGem, setStatGem] = useState();
+  const [feeGem, setFeeGem] = useState();
 
   useEffect(async () => {
     try {
@@ -145,9 +149,22 @@ const Main = () => {
     }
   }, []);
 
-  const [inputValue, setInputValue] = useState(undefined);
-  const [outputValue, setOutputValue] = useState(0.00);
-  const [fee, setFee] = useState(0.00);
+  useEffect(() => {
+    const selGem = inputCurrency.name === 'DAI' ? outputCurrency.name : inputCurrency.name;
+
+    if (stats) {
+      setStatGem(stats[selGem]);
+    }
+
+    if (fees) {
+      setFeeGem(fees[selGem]);
+    }
+  }, [inputCurrency.name, outputCurrency.name]);
+
+  /**
+   * Section
+   */
+  const [circleState, setCircleState] = useState(0);
 
   const getOriginCurrency = () => {
     if (!inputCurrency) return false;
@@ -156,17 +173,24 @@ const Main = () => {
 
   const isBuyingGem = () => getOriginCurrency() === 'DAI';
 
+  /**
+   * Section update Input value
+   */
+  const [inputValue, setInputValue] = useState(undefined);
+  const [outputValue, setOutputValue] = useState(0.00);
+
   const updateInputValue = (value, isBuying) => {
     if (!value) {
       setInputValue(undefined);
       return;
     }
-    const currencyData = stats[getOriginCurrency()];
-    const usedCurrency = currencyData?.used;
-    const totalCurrency = currencyData?.total;
+
+    const usedCurrency = statGem?.used || 0;
+    const totalCurrency = statGem?.total || 0;
+    const gemTout = feeGem?.tout || 0;
 
     if (isBuying) {
-      const toutDecimal = fees.tout / 100;
+      const toutDecimal = gemTout / 100;
       const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
 
       if (Number(value - chargedFee) > usedCurrency) {
@@ -191,10 +215,9 @@ const Main = () => {
     updateInputValue(value, isBuyingGem());
   };
 
-  //
-  // Select currencies logic
-  //
-
+  /**
+   * Select currencies logic section
+   */
   const handleCurrencyClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
     let tempInputCurrency;
@@ -219,32 +242,9 @@ const Main = () => {
     updateInputValue(inputValue, tempInputCurrency.name === 'DAI');
   };
 
-  //
-  // Trade Logic
-  //
-  const [circleState, setCircleState] = useState(0);
-
-  useEffect(() => {
-    if (!fees || !inputValue) {
-      setOutputValue(0.00);
-      return;
-    }
-
-    let chargedFee;
-    if (isBuyingGem()) {
-      // Determined from equations system:
-      // inputValue - chargedFee = outputValue
-      // chargedFee = outputValue * tout;
-      const toutDecimal = fees.tout / 100;
-      chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
-    } else {
-      // Determined from single equation outputValue = inputValue * (1 - tin)
-      chargedFee = (inputValue * fees.tin) / 100;
-    }
-
-    setOutputValue(inputValue - chargedFee);
-    setFee(chargedFee);
-  }, [inputValue, inputCurrency]);
+  /**
+   * Trade Section
+   */
 
   const trade = async () => {
     if (!account) return;
@@ -260,7 +260,7 @@ const Main = () => {
     try {
       let tradedAmountUSDC;
       if (isBuyingGem()) {
-        tradedAmountUSDC = inputValue * (1 - fees.tin / 100);
+        tradedAmountUSDC = inputValue * (1 - feeGem.tin / 100);
       } else {
         tradedAmountUSDC = inputValue;
       }
@@ -293,7 +293,38 @@ const Main = () => {
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
   };
 
-  // eslint-disable-next-line no-unused-vars
+  /**
+   * Charged Fee Section on Output Value
+   */
+
+  const [fee, setFee] = useState(0.00);
+
+  useEffect(() => {
+    if (!feeGem || !inputValue) {
+      setOutputValue(0.00);
+      return;
+    }
+
+    let chargedFee;
+    if (isBuyingGem()) {
+      // Determined from equations system:
+      // inputValue - chargedFee = outputValue
+      // chargedFee = outputValue * tout;
+      const toutDecimal = feeGem.tout / 100;
+      chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
+    } else {
+      // Determined from single equation outputValue = inputValue * (1 - tin)
+      chargedFee = (inputValue * feeGem.tin) / 100;
+    }
+
+    setOutputValue(inputValue - chargedFee);
+    setFee(chargedFee);
+  }, [inputValue, inputCurrency]);
+
+  /**
+   * Percentages Section
+   */
+
   const [totalPercentage, setTotalPercentage] = useState(null);
 
   useEffect(() => {
@@ -309,6 +340,8 @@ const Main = () => {
       setTotalPercentage(percentageTotal);
     }
   }, [stats]);
+
+  console.log({ fees });
 
   return (
     <>
@@ -353,7 +386,7 @@ const Main = () => {
             </div>
           </div>
           <div className="InfoContainer">
-            {inputValue && fee && (
+            {!!inputValue && !!fee && (
               <Info img={InfoImg}>
                 <div className="InfoData">
                   <span>Fees:</span>
@@ -363,7 +396,7 @@ const Main = () => {
                     {fee.toFixed(2)}
                     {' '}
                     / (
-                    {isBuyingGem() ? fees.tout : fees.tin}
+                    {isBuyingGem() ? feeGem.tout : feeGem.tin}
                     %)
                   </span>
                 </div>

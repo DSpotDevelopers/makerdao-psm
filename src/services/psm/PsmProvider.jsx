@@ -10,15 +10,22 @@ const Tokens = {
   USDC: 'USDC',
   PAX: 'PAX',
 };
-const PSMTokens = [
-  {
+const PSMTokens = {
+  USDC: {
     psmToken: 'PSM-USDC-A',
     nameToken: 'USDC',
-  }, {
+    addressPSMToken: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
+    addressGemJoinToken: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
+    abiToken: PsmAbi,
+  },
+  PAX: {
     psmToken: 'PSM-PAX-A',
     nameToken: 'PAX',
+    addressPSMToken: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
+    addressGemJoinToken: '0x0A59649758aa4d66E25f08Dd01271e891fe52199', // This is INCORRECT
+    abiToken: PsmAbi,
   },
-];
+};
 const ABIs = {
   ERC20: ERC20Abi,
   PSM: PsmAbi,
@@ -31,7 +38,6 @@ const Addresses = {
   PAX: '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
 
   PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
-  PSM_PAX: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
 
   GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
   VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
@@ -51,8 +57,10 @@ const buildContract = (abi, address, provider = Web3.givenProvider) => {
 const getStats = async (provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
+
+  const PSMTokensArray = Object.values(PSMTokens);
   // eslint-disable-next-line max-len
-  const ilksArray = PSMTokens.map((tokenIlk) => vatContract.methods.ilks(web3.utils.fromAscii(tokenIlk.psmToken)).call());
+  const ilksArray = PSMTokensArray.map((tokenIlk) => vatContract.methods.ilks(web3.utils.fromAscii(tokenIlk.psmToken)).call());
 
   const ilks = await Promise.all(ilksArray);
 
@@ -67,7 +75,7 @@ const getStats = async (provider = Web3.givenProvider) => {
 
     return ({
       ...accumulator,
-      [PSMTokens[index].nameToken]: extractedData,
+      [PSMTokensArray[index].nameToken]: extractedData,
     });
   }, {});
 
@@ -75,13 +83,29 @@ const getStats = async (provider = Web3.givenProvider) => {
 };
 
 const getFees = async (provider = Web3.givenProvider) => {
-  const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
-  return {
-    // eslint-disable-next-line no-mixed-operators
-    tin: await psmContract.methods.tin().call() * 100 / WAD, // USDC -> DAI
-    // eslint-disable-next-line no-mixed-operators
-    tout: await psmContract.methods.tout().call() * 100 / WAD, // DAI -> USDC
-  };
+  const contracts = Object.values(PSMTokens).map((item) => {
+    const psmContract = buildContract(item.abiToken, item.addressPSMToken, provider);
+    return { psmContract, nameToken: item.nameToken };
+  });
+
+  const tinArray = contracts.map((item) => item.psmContract.methods.tin().call());
+  const toutArray = contracts.map((item) => item.psmContract.methods.tout().call());
+
+  const tinValues = await Promise.all(tinArray);
+  const toutValues = await Promise.all(toutArray);
+
+  const fees = {};
+  contracts.forEach((item, index) => {
+    const feeStructure = {
+      tin: (tinValues[index] * 100) / WAD, // Gem -> DAI
+
+      tout: (toutValues[index] * 100) / WAD, // DAI -> Gem
+    };
+
+    fees[item.nameToken] = feeStructure;
+  });
+
+  return fees;
 };
 
 const isValidOperation = (from, to) => from !== to && (from === Tokens.DAI || to === Tokens.DAI);
@@ -114,6 +138,7 @@ const approve = async (from, to, account, provider = Web3.givenProvider) => {
 
 const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
   const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
+
   const [operation, amount] = isBuying(from, to)
     ? [psmContract.methods.buyGem, Math.trunc(pAmount * USDC_DECIMALS)]
     : [psmContract.methods.sellGem, Math.trunc(pAmount * USDC_DECIMALS)];
