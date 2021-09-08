@@ -14,16 +14,20 @@ const PSMTokens = {
   USDC: {
     psmToken: 'PSM-USDC-A',
     nameToken: 'USDC',
-    addressPSMToken: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
-    addressGemJoinToken: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
+    addressToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    addressPSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
+    addressGemJoin: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
     abiToken: PsmAbi,
+    decimals: 10 ** 6,
   },
   PAX: {
     psmToken: 'PSM-PAX-A',
     nameToken: 'PAX',
-    addressPSMToken: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
-    addressGemJoinToken: '0x0A59649758aa4d66E25f08Dd01271e891fe52199', // This is INCORRECT
+    addressToken: '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
+    addressPSM: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
+    addressGemJoin: '0x7bbd8cA5e413bCa521C2c80D8d1908616894Cf21',
     abiToken: PsmAbi,
+    decimals: 10 ** 18,
   },
 };
 const ABIs = {
@@ -34,16 +38,10 @@ const ABIs = {
 
 const Addresses = {
   DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
-  USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  PAX: '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
 
-  PSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
-
-  GEM_JOIN: '0x0A59649758aa4d66E25f08Dd01271e891fe52199',
   VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
 };
 
-const USDC_DECIMALS = 10 ** 6;
 const WAD = 10 ** 18;
 const RAD = 10 ** 45;
 const MAX_APPROVAL_AMOUNT = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
@@ -84,7 +82,7 @@ const getStats = async (provider = Web3.givenProvider) => {
 
 const getFees = async (provider = Web3.givenProvider) => {
   const contracts = Object.values(PSMTokens).map((item) => {
-    const psmContract = buildContract(item.abiToken, item.addressPSMToken, provider);
+    const psmContract = buildContract(item.abiToken, item.addressPSM, provider);
     return { psmContract, nameToken: item.nameToken };
   });
 
@@ -119,8 +117,10 @@ const isBuying = (from, to) => {
 
 const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider) => {
   const [contract, approvalAddress] = isBuying(from, to)
-    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM]
-    : [buildContract(ABIs.ERC20, Addresses.USDC, provider), Addresses.GEM_JOIN];
+    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), PSMTokens[to].addressPSM]
+    : [buildContract(ABIs.ERC20, PSMTokens[from].addressToken, provider),
+    // eslint-disable-next-line indent
+    PSMTokens[to].addressGemJoin];
 
   const allowance = await contract.methods.allowance(walletAddress, approvalAddress).call();
   return allowance >= MIN_APPROVAL_AMOUNT;
@@ -128,20 +128,21 @@ const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider
 
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
   const [contract, approvalAddress, approvalAmount] = isBuying(from, to)
-    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), Addresses.PSM, MAX_APPROVAL_AMOUNT]
-    : [buildContract(ABIs.ERC20, Addresses.USDC, provider),
+    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), PSMTokens[to].addressPSM,
+      MAX_APPROVAL_AMOUNT]
+    : [buildContract(ABIs.ERC20, PSMTokens[from].addressToken, provider),
     // eslint-disable-next-line indent
-    Addresses.GEM_JOIN, MAX_APPROVAL_AMOUNT];
+    PSMTokens[to].addressGemJoin, MAX_APPROVAL_AMOUNT];
 
   return contract.methods.approve(approvalAddress, approvalAmount).send({ from: account });
 };
 
 const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
-  const psmContract = buildContract(ABIs.PSM, Addresses.PSM, provider);
+  const psmContract = buildContract(PSMTokens[from].abiToken, PSMTokens[from].addressPSM, provider);
 
   const [operation, amount] = isBuying(from, to)
-    ? [psmContract.methods.buyGem, Math.trunc(pAmount * USDC_DECIMALS)]
-    : [psmContract.methods.sellGem, Math.trunc(pAmount * USDC_DECIMALS)];
+    ? [psmContract.methods.buyGem, Math.trunc(pAmount * PSMTokens[to].decimals)]
+    : [psmContract.methods.sellGem, Math.trunc(pAmount * PSMTokens[from].decimals)];
 
   await operation(account, amount.toString()).send({ from: account });
 };

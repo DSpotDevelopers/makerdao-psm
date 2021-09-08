@@ -341,8 +341,6 @@ const Main = () => {
     }
   }, [stats]);
 
-  console.log({ fees });
-
   return (
     <>
       <div className="MainWrapper">
