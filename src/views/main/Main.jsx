@@ -138,6 +138,9 @@ const Main = () => {
   const [statGem, setStatGem] = useState();
   const [feeGem, setFeeGem] = useState();
 
+  const [inputValue, setInputValue] = useState(undefined);
+  const [outputValue, setOutputValue] = useState(0.00);
+
   useEffect(async () => {
     try {
       setStats(await psmService.getStats());
@@ -160,7 +163,7 @@ const Main = () => {
     if (fees) {
       setFeeGem(fees[selectedGem]);
     }
-  }, [inputCurrency, outputCurrency]);
+  }, [inputValue, inputCurrency, outputCurrency, stats]);
 
   /**
    * Section
@@ -177,8 +180,6 @@ const Main = () => {
   /**
    * Section update Input value
    */
-  const [inputValue, setInputValue] = useState(undefined);
-  const [outputValue, setOutputValue] = useState(0.00);
 
   const updateInputValue = (value, isBuying) => {
     if (!value) {
@@ -301,7 +302,7 @@ const Main = () => {
   const [fee, setFee] = useState(0.00);
 
   useEffect(() => {
-    if (!feeGem || !inputValue) {
+    if ((feeGem !== 0 && !feeGem) || !inputValue) {
       setOutputValue(0.00);
       return;
     }
