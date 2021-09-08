@@ -114,35 +114,41 @@ const isBuying = (from, to) => {
   }
   return from === Tokens.DAI;
 };
+const getGem = (from, to) => (from === Tokens.DAI ? to : from);
 
 const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider) => {
+  const gem = PSMTokens[getGem(from, to)];
+
   const [contract, approvalAddress] = isBuying(from, to)
-    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), PSMTokens[to].addressPSM]
-    : [buildContract(ABIs.ERC20, PSMTokens[from].addressToken, provider),
+    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), gem.addressPSM]
+    : [buildContract(ABIs.ERC20, gem.addressToken, provider),
     // eslint-disable-next-line indent
-    PSMTokens[to].addressGemJoin];
+    gem.addressGemJoin];
 
   const allowance = await contract.methods.allowance(walletAddress, approvalAddress).call();
   return allowance >= MIN_APPROVAL_AMOUNT;
 };
 
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
+  const gem = PSMTokens[getGem(from, to)];
   const [contract, approvalAddress, approvalAmount] = isBuying(from, to)
-    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), PSMTokens[to].addressPSM,
+    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), gem.addressPSM,
       MAX_APPROVAL_AMOUNT]
-    : [buildContract(ABIs.ERC20, PSMTokens[from].addressToken, provider),
+    : [buildContract(ABIs.ERC20, gem.addressToken, provider),
     // eslint-disable-next-line indent
-    PSMTokens[to].addressGemJoin, MAX_APPROVAL_AMOUNT];
+    gem.addressGemJoin, MAX_APPROVAL_AMOUNT];
 
   return contract.methods.approve(approvalAddress, approvalAmount).send({ from: account });
 };
 
 const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
-  const psmContract = buildContract(PSMTokens[from].abiToken, PSMTokens[from].addressPSM, provider);
+  const gem = PSMTokens[getGem(from, to)];
+
+  const psmContract = buildContract(gem.abiToken, gem.addressPSM, provider);
 
   const [operation, amount] = isBuying(from, to)
-    ? [psmContract.methods.buyGem, Math.trunc(pAmount * PSMTokens[to].decimals)]
-    : [psmContract.methods.sellGem, Math.trunc(pAmount * PSMTokens[from].decimals)];
+    ? [psmContract.methods.buyGem, Math.trunc(pAmount * gem.decimals)]
+    : [psmContract.methods.sellGem, Math.trunc(pAmount * gem.decimals)];
 
   await operation(account, amount.toString()).send({ from: account });
 };

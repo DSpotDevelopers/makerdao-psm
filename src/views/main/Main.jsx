@@ -89,6 +89,7 @@ const Main = () => {
   const checkApproval = async (pInputCurrency, pOutputCurrency, pAccount) => {
     try {
       const isApproved = await psmService.isApproved(pInputCurrency, pOutputCurrency, pAccount);
+
       setApproved(isApproved);
     } catch (e) {
       notify({
@@ -150,16 +151,16 @@ const Main = () => {
   }, []);
 
   useEffect(() => {
-    const selGem = inputCurrency.name === 'DAI' ? outputCurrency.name : inputCurrency.name;
+    const selectedGem = inputCurrency.name === 'DAI' ? outputCurrency.name : inputCurrency.name;
 
     if (stats) {
-      setStatGem(stats[selGem]);
+      setStatGem(stats[selectedGem]);
     }
 
     if (fees) {
-      setFeeGem(fees[selGem]);
+      setFeeGem(fees[selectedGem]);
     }
-  }, [inputCurrency.name, outputCurrency.name]);
+  }, [inputCurrency, outputCurrency]);
 
   /**
    * Section
@@ -319,7 +320,7 @@ const Main = () => {
 
     setOutputValue(inputValue - chargedFee);
     setFee(chargedFee);
-  }, [inputValue, inputCurrency]);
+  }, [inputValue, feeGem, inputCurrency]);
 
   /**
    * Percentages Section
