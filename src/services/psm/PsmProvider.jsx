@@ -1,4 +1,5 @@
 import React, { createContext, useContext } from 'react';
+import Big from 'big.js';
 import PropTypes from 'prop-types';
 import Web3 from 'web3';
 import PsmAbi from './abi/PSM.json';
@@ -147,12 +148,16 @@ const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) 
   const gem = PSMTokens[getGem(from, to)];
 
   const psmContract = buildContract(gem.abiToken, gem.addressPSM, provider);
+  const decimalsBigNumber = Big(gem.decimals);
 
-  const [operation, amount] = isBuying(from, to)
-    ? [psmContract.methods.buyGem, Math.trunc(pAmount * gem.decimals)]
-    : [psmContract.methods.sellGem, Math.trunc(pAmount * gem.decimals)];
+  const amount = decimalsBigNumber.times(pAmount).toFixed();
 
-  await operation(account, amount.toString()).send({ from: account });
+  // eslint-disable-next-line no-unused-vars
+  const operation = isBuying(from, to)
+    ? psmContract.methods.buyGem
+    : psmContract.methods.sellGem;
+
+  await operation(account, amount).send({ from: account });
 };
 
 const PsmContext = createContext(null);

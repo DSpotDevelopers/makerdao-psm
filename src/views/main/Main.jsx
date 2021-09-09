@@ -247,7 +247,6 @@ const Main = () => {
   /**
    * Trade Section
    */
-
   const trade = async () => {
     if (!account) return;
 
@@ -298,7 +297,6 @@ const Main = () => {
   /**
    * Charged Fee Section on Output Value
    */
-
   const [fee, setFee] = useState(0.00);
 
   useEffect(() => {
@@ -326,7 +324,6 @@ const Main = () => {
   /**
    * Percentages Section
    */
-
   const [totalPercentage, setTotalPercentage] = useState(null);
 
   useEffect(() => {
