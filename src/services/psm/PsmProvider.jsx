@@ -10,9 +10,10 @@ const Tokens = {
   USDC: 'USDC',
   PAX: 'PAX',
 };
+
 const PSMTokens = {
   USDC: {
-    psmToken: 'PSM-USDC-A',
+    ilkTokenName: 'PSM-USDC-A',
     nameToken: 'USDC',
     addressToken: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     addressPSM: '0x89B78CfA322F6C5dE0aBcEecab66Aee45393cC5A',
@@ -21,7 +22,7 @@ const PSMTokens = {
     decimals: 10 ** 6,
   },
   PAX: {
-    psmToken: 'PSM-PAX-A',
+    ilkTokenName: 'PSM-PAX-A',
     nameToken: 'PAX',
     addressToken: '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
     addressPSM: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
@@ -57,8 +58,9 @@ const getStats = async (provider = Web3.givenProvider) => {
   const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
 
   const PSMTokensArray = Object.values(PSMTokens);
-  // eslint-disable-next-line max-len
-  const ilksArray = PSMTokensArray.map((tokenIlk) => vatContract.methods.ilks(web3.utils.fromAscii(tokenIlk.psmToken)).call());
+
+  const ilksArray = PSMTokensArray.map((tokenIlk) => vatContract
+    .methods.ilks(web3.utils.fromAscii(tokenIlk.ilkTokenName)).call());
 
   const ilks = await Promise.all(ilksArray);
 
@@ -81,9 +83,9 @@ const getStats = async (provider = Web3.givenProvider) => {
 };
 
 const getFees = async (provider = Web3.givenProvider) => {
-  const contracts = Object.values(PSMTokens).map((item) => {
-    const psmContract = buildContract(item.abiToken, item.addressPSM, provider);
-    return { psmContract, nameToken: item.nameToken };
+  const contracts = Object.values(PSMTokens).map((gem) => {
+    const psmContract = buildContract(gem.abiToken, gem.addressPSM, provider);
+    return { psmContract, nameToken: gem.nameToken };
   });
 
   const tinArray = contracts.map((item) => item.psmContract.methods.tin().call());
