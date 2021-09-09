@@ -260,15 +260,15 @@ const Main = () => {
     }
 
     try {
-      let tradedAmountUSDC;
+      let tradeAmount;
       if (isBuyingGem()) {
-        tradedAmountUSDC = inputValue * (1 - feeGem.tin / 100);
+        tradeAmount = inputValue * (1 - feeGem.tout / 100);
       } else {
-        tradedAmountUSDC = inputValue;
+        tradeAmount = inputValue;
       }
 
       await psmService.trade(inputCurrency.name, outputCurrency.name,
-        tradedAmountUSDC, account, provider);
+        tradeAmount, account, provider);
 
       notify({
         type: 'Success',
