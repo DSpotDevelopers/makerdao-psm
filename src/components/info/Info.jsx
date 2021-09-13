@@ -16,7 +16,10 @@ const Info = ({
 Info.propTypes = {
   value: PropTypes.string,
   img: PropTypes.string,
-  children: PropTypes.string,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]),
   left: PropTypes.bool,
 };
 
@@ -24,7 +27,7 @@ Info.defaultProps = {
   value: '',
   img: '',
   left: false,
-  children: undefined,
+  children: null,
 };
 
 export default Info;

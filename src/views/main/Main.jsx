@@ -10,12 +10,26 @@ import Input from '../../components/input/Input';
 import Select from '../../components/select/Select';
 import DAIImg from '../../assets/dai.png';
 import USDCImg from '../../assets/usdc.png';
+import PAXImg from '../../assets/pax.png';
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
 import InfoImg from '../../assets/hand.svg';
 import { usePsmService } from '../../services/psm/PsmProvider';
 import Notification from '../../components/notification/Notification';
+
+const currencies = [{
+  name: 'DAI',
+  image: DAIImg,
+}, {
+  name: 'USDC',
+  image: USDCImg,
+},
+{
+  name: 'PAX',
+  image: PAXImg,
+},
+];
 
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -26,6 +40,8 @@ function decimalSeparator() {
 }
 
 const Main = () => {
+  const psmService = usePsmService();
+
   //
   // Notifications Logic
   //
@@ -40,6 +56,10 @@ const Main = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // Currencies states
+  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
+  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
+
   //
   // Connection Logic
   //
@@ -48,19 +68,6 @@ const Main = () => {
   const [provider, setProvider] = useState(undefined);
 
   const [approved, setApproved] = useState(false);
-
-  // Currencies states
-  const currencies = [{
-    name: 'DAI',
-    image: DAIImg,
-  }, {
-    name: 'USDC',
-    image: USDCImg,
-  }];
-  const [inputCurrency, setInputCurrency] = useState(currencies[0]);
-  const [outputCurrency, setOutputCurrency] = useState(currencies[1]);
-
-  const psmService = usePsmService();
 
   const providerOptions = {
     walletconnect: {
@@ -82,6 +89,7 @@ const Main = () => {
   const checkApproval = async (pInputCurrency, pOutputCurrency, pAccount) => {
     try {
       const isApproved = await psmService.isApproved(pInputCurrency, pOutputCurrency, pAccount);
+
       setApproved(isApproved);
     } catch (e) {
       notify({
@@ -121,11 +129,17 @@ const Main = () => {
     }
   };
 
-  //
-  // PSM
-  //
-  const [stats, setStats] = useState(undefined);
-  const [fees, setFees] = useState(undefined);
+  /**
+   * Stats and Fees section
+   */
+  const [stats, setStats] = useState({});
+  const [fees, setFees] = useState();
+
+  const [statGem, setStatGem] = useState();
+  const [feeGem, setFeeGem] = useState();
+
+  const [inputValue, setInputValue] = useState(undefined);
+  const [outputValue, setOutputValue] = useState(0.00);
 
   useEffect(async () => {
     try {
@@ -139,14 +153,33 @@ const Main = () => {
     }
   }, []);
 
-  const [inputValue, setInputValue] = useState(undefined);
-  const [outputValue, setOutputValue] = useState(0.00);
-  const [fee, setFee] = useState(0.00);
+  useEffect(() => {
+    const selectedGem = inputCurrency.name === 'DAI' ? outputCurrency.name : inputCurrency.name;
 
-  const isBuyingGem = () => {
+    if (stats) {
+      setStatGem(stats[selectedGem]);
+    }
+
+    if (fees) {
+      setFeeGem(fees[selectedGem]);
+    }
+  }, [inputValue, inputCurrency, outputCurrency, stats]);
+
+  /**
+   * Section
+   */
+  const [circleState, setCircleState] = useState(0);
+
+  const getOriginCurrency = () => {
     if (!inputCurrency) return false;
-    return inputCurrency.name === 'DAI';
+    return inputCurrency.name;
   };
+
+  const isBuyingGem = () => getOriginCurrency() === 'DAI';
+
+  /**
+   * Section update Input value
+   */
 
   const updateInputValue = (value, isBuying) => {
     if (!value) {
@@ -154,16 +187,20 @@ const Main = () => {
       return;
     }
 
+    const usedCurrency = statGem?.used || 0;
+    const totalCurrency = statGem?.total || 0;
+    const gemTout = feeGem?.tout || 0;
+
     if (isBuying) {
-      const toutDecimal = fees.tout / 100;
+      const toutDecimal = gemTout / 100;
       const chargedFee = (value * toutDecimal) / (1 + toutDecimal);
 
-      if (Number(value - chargedFee) > stats.used) {
-        setInputValue((stats.used + stats.used * toutDecimal).toFixed(2));
+      if (Number(value - chargedFee) > usedCurrency) {
+        setInputValue((usedCurrency + usedCurrency * toutDecimal).toFixed(2));
         return;
       }
-    } else if (Number(value) > stats.total - stats.used) {
-      setInputValue((stats.total - stats.used).toFixed(2));
+    } else if (Number(value) > totalCurrency - usedCurrency) {
+      setInputValue((totalCurrency - usedCurrency).toFixed(2));
       return;
     }
 
@@ -180,10 +217,9 @@ const Main = () => {
     updateInputValue(value, isBuyingGem());
   };
 
-  //
-  // Select currencies logic
-  //
-
+  /**
+   * Select currencies logic section
+   */
   const handleCurrencyClick = async (el, isLeft) => {
     const opposite = currencies.filter((x) => x.name !== el.name)[0];
     let tempInputCurrency;
@@ -208,33 +244,9 @@ const Main = () => {
     updateInputValue(inputValue, tempInputCurrency.name === 'DAI');
   };
 
-  //
-  // Trade Logic
-  //
-  const [circleState, setCircleState] = useState(0);
-
-  useEffect(() => {
-    if (!fees || !inputValue) {
-      setOutputValue(0.00);
-      return;
-    }
-
-    let chargedFee;
-    if (isBuyingGem()) {
-      // Determined from equations system:
-      // inputValue - chargedFee = outputValue
-      // chargedFee = outputValue * tout;
-      const toutDecimal = fees.tout / 100;
-      chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
-    } else {
-      // Determined from single equation outputValue = inputValue * (1 - tin)
-      chargedFee = (inputValue * fees.tin) / 100;
-    }
-
-    setOutputValue(inputValue - chargedFee);
-    setFee(chargedFee);
-  }, [inputValue, inputCurrency]);
-
+  /**
+   * Trade Section
+   */
   const trade = async () => {
     if (!account) return;
 
@@ -247,15 +259,15 @@ const Main = () => {
     }
 
     try {
-      let tradedAmountUSDC;
+      let tradeAmount;
       if (isBuyingGem()) {
-        tradedAmountUSDC = inputValue * (1 - fees.tin / 100);
+        tradeAmount = inputValue * (1 - feeGem.tout / 100);
       } else {
-        tradedAmountUSDC = inputValue;
+        tradeAmount = inputValue;
       }
 
       await psmService.trade(inputCurrency.name, outputCurrency.name,
-        tradedAmountUSDC, account, provider);
+        tradeAmount, account, provider);
 
       notify({
         type: 'Success',
@@ -281,6 +293,52 @@ const Main = () => {
     await psmService.approve(inputCurrency.name, outputCurrency.name, account, provider);
     await checkApproval(inputCurrency.name, outputCurrency.name, account);
   };
+
+  /**
+   * Charged Fee Section on Output Value
+   */
+  const [fee, setFee] = useState(0.00);
+
+  useEffect(() => {
+    if ((feeGem !== 0 && !feeGem) || !inputValue) {
+      setOutputValue(0.00);
+      return;
+    }
+
+    let chargedFee;
+    if (isBuyingGem()) {
+      // Determined from equations system:
+      // inputValue - chargedFee = outputValue
+      // chargedFee = outputValue * tout;
+      const toutDecimal = feeGem.tout / 100;
+      chargedFee = (inputValue * toutDecimal) / (1 + toutDecimal);
+    } else {
+      // Determined from single equation outputValue = inputValue * (1 - tin)
+      chargedFee = (inputValue * feeGem.tin) / 100;
+    }
+
+    setOutputValue(inputValue - chargedFee);
+    setFee(chargedFee);
+  }, [inputValue, feeGem, inputCurrency]);
+
+  /**
+   * Percentages Section
+   */
+  const [totalPercentage, setTotalPercentage] = useState(null);
+
+  useEffect(() => {
+    const totalUsed = Object.values(stats)
+      .reduce((accumulator, item) => accumulator + item.used, 0);
+
+    const totalLine = Object.values(stats)
+      .reduce((accumulator, item) => accumulator + item.total, 0);
+
+    if (totalLine > 0) {
+      const percentageTotal = (totalUsed * 100) / totalLine;
+
+      setTotalPercentage(percentageTotal);
+    }
+  }, [stats]);
 
   return (
     <>
@@ -325,7 +383,7 @@ const Main = () => {
             </div>
           </div>
           <div className="InfoContainer">
-            {inputValue && fee && (
+            {!!inputValue && !!fee && (
               <Info img={InfoImg}>
                 <div className="InfoData">
                   <span>Fees:</span>
@@ -335,7 +393,7 @@ const Main = () => {
                     {fee.toFixed(2)}
                     {' '}
                     / (
-                    {isBuyingGem() ? fees.tout : fees.tin}
+                    {isBuyingGem() ? feeGem.tout : feeGem.tin}
                     %)
                   </span>
                 </div>
@@ -349,7 +407,7 @@ const Main = () => {
             /* eslint-disable no-nested-ternary */
             label={connected ? (approved ? 'Trade' : 'Approve') : 'Connect'}
             onClick={() => (connected ? (approved ? trade() : approve()) : connect())}
-            /* eslint-enable no-nested-ternary */
+          /* eslint-enable no-nested-ternary */
           />
 
           <div className="Stats">
@@ -358,34 +416,52 @@ const Main = () => {
                 Currency Reserves
               </div>
             </Info>
-            <div className="StatsRow">
-              <div className="Image">
-                <img src={USDCImg} alt="usdc" />
-              </div>
-              <div className="StatsInfo">
-                <div className="Label">USDC:</div>
-                <div className="Value">
-                  {stats && stats.used && numberWithCommas(stats.used.toFixed(2))}
-                  {' '}
-                  (
-                  {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
-                  %)
+            <>
+              {
+                Object.keys(stats).map((key) => {
+                  const stat = stats[key];
+                  const imageCurrency = currencies.find((item) => item.name === key)?.image;
+
+                  if (stat?.used && stat?.usedPercent && imageCurrency) {
+                    return (
+                      <div className="StatsRow" key={key}>
+                        <div className="Image">
+                          <img src={imageCurrency} alt={key.toLowerCase()} />
+                        </div>
+                        <div className="StatsInfo">
+                          <div className="Label">{`${key}:`}</div>
+                          <div className="Value">
+                            {stat.used && numberWithCommas(stat.used.toFixed(2))}
+                            {' '}
+                            (
+                            {stat.usedPercent && stat.usedPercent.toFixed(2)}
+                            %)
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })
+              }
+            </>
+            {totalPercentage && (
+              <div className="StatsRow">
+                <div className="StatsInfo">
+                  <div className="Label">Liquidity Utilization:</div>
+                  <div className="Value">
+                    (
+                    {totalPercentage.toFixed(2)}
+                    %)
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="StatsRow">
-              <div className="StatsInfo">
-                <div className="Label">Liquidity Utilization:</div>
-                <div className="Value">
-                  (
-                  {stats && stats.usedPercent && stats.usedPercent.toFixed(2)}
-                  %)
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
+
       <div className="Footer">
         <div>
           A
