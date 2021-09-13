@@ -12,7 +12,7 @@ const Tokens = {
   PAX: 'PAX',
 };
 
-const PSMTokens = {
+const admitedCollaterals = {
   USDC: {
     ilkTokenName: 'PSM-USDC-A',
     nameToken: 'USDC',
@@ -32,15 +32,15 @@ const PSMTokens = {
     decimals: 10 ** 18,
   },
 };
+
 const ABIs = {
   ERC20: ERC20Abi,
   PSM: PsmAbi,
   VAT: VatAbi,
 };
 
-const Addresses = {
+const ADDRESSES = {
   DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
-
   VAT: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
 };
 
@@ -56,16 +56,16 @@ const buildContract = (abi, address, provider = Web3.givenProvider) => {
 
 const getStats = async (provider = Web3.givenProvider) => {
   const web3 = new Web3(provider);
-  const vatContract = buildContract(ABIs.VAT, Addresses.VAT, provider);
+  const vatContract = buildContract(ABIs.VAT, ADDRESSES.VAT, provider);
 
-  const PSMTokensArray = Object.values(PSMTokens);
+  const admitedCollateralsValues = Object.values(admitedCollaterals);
 
-  const ilksArray = PSMTokensArray.map((tokenIlk) => vatContract
+  const statsAll = admitedCollateralsValues.map((tokenIlk) => vatContract
     .methods.ilks(web3.utils.fromAscii(tokenIlk.ilkTokenName)).call());
 
-  const ilks = await Promise.all(ilksArray);
+  const statsResolved = await Promise.all(statsAll);
 
-  const ilksExtracted = ilks.reduce((accumulator, ilk, index) => {
+  const stats = statsResolved.reduce((accumulator, ilk, index) => {
     const used = (ilk.Art * ilk.rate) / RAD;
     const line = ilk.line / RAD;
     const extractedData = {
@@ -76,15 +76,15 @@ const getStats = async (provider = Web3.givenProvider) => {
 
     return ({
       ...accumulator,
-      [PSMTokensArray[index].nameToken]: extractedData,
+      [admitedCollateralsValues[index].nameToken]: extractedData,
     });
   }, {});
 
-  return ilksExtracted;
+  return stats;
 };
 
 const getFees = async (provider = Web3.givenProvider) => {
-  const contracts = Object.values(PSMTokens).map((gem) => {
+  const contracts = Object.values(admitedCollaterals).map((gem) => {
     const psmContract = buildContract(gem.abiToken, gem.addressPSM, provider);
     return { psmContract, nameToken: gem.nameToken };
   });
@@ -117,35 +117,34 @@ const isBuying = (from, to) => {
   }
   return from === Tokens.DAI;
 };
+
 const getGem = (from, to) => (from === Tokens.DAI ? to : from);
 
 const isApproved = async (from, to, walletAddress, provider = Web3.givenProvider) => {
-  const gem = PSMTokens[getGem(from, to)];
+  const gem = admitedCollaterals[getGem(from, to)];
 
   const [contract, approvalAddress] = isBuying(from, to)
-    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), gem.addressPSM]
+    ? [buildContract(ABIs.ERC20, ADDRESSES.DAI, provider), gem.addressPSM]
     : [buildContract(ABIs.ERC20, gem.addressToken, provider),
-    // eslint-disable-next-line indent
-    gem.addressGemJoin];
+      gem.addressGemJoin];
 
   const allowance = await contract.methods.allowance(walletAddress, approvalAddress).call();
   return allowance >= MIN_APPROVAL_AMOUNT;
 };
 
 const approve = async (from, to, account, provider = Web3.givenProvider) => {
-  const gem = PSMTokens[getGem(from, to)];
+  const gem = admitedCollaterals[getGem(from, to)];
   const [contract, approvalAddress, approvalAmount] = isBuying(from, to)
-    ? [buildContract(ABIs.ERC20, Addresses.DAI, provider), gem.addressPSM,
+    ? [buildContract(ABIs.ERC20, ADDRESSES.DAI, provider), gem.addressPSM,
       MAX_APPROVAL_AMOUNT]
     : [buildContract(ABIs.ERC20, gem.addressToken, provider),
-    // eslint-disable-next-line indent
-    gem.addressGemJoin, MAX_APPROVAL_AMOUNT];
+      gem.addressGemJoin, MAX_APPROVAL_AMOUNT];
 
   return contract.methods.approve(approvalAddress, approvalAmount).send({ from: account });
 };
 
 const trade = async (from, to, pAmount, account, provider = Web3.givenProvider) => {
-  const gem = PSMTokens[getGem(from, to)];
+  const gem = admitedCollaterals[getGem(from, to)];
 
   const psmContract = buildContract(gem.abiToken, gem.addressPSM, provider);
   const decimalsBigNumber = Big(gem.decimals);
