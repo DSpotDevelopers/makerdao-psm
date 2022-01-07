@@ -5,11 +5,33 @@ import Web3 from 'web3';
 import PsmAbi from './abi/PSM.json';
 import VatAbi from './abi/VAT.json';
 import ERC20Abi from './abi/ERC20.json';
+import DAIImg from '../../assets/dai.png';
+import USDCImg from '../../assets/usdc.png';
+import PAXImg from '../../assets/pax.png';
+import GUSDImg from '../../assets/gusd.png';
+
+export const currencies = [{
+  name: 'DAI',
+  image: DAIImg,
+}, {
+  name: 'USDC',
+  image: USDCImg,
+},
+{
+  name: 'PAX',
+  image: PAXImg,
+},
+{
+  name: 'GUSD',
+  image: GUSDImg,
+},
+];
 
 const Tokens = {
   DAI: 'DAI',
   USDC: 'USDC',
   PAX: 'PAX',
+  GUSD: 'GUSD',
 };
 
 const admitedCollaterals = {
@@ -27,9 +49,18 @@ const admitedCollaterals = {
     nameToken: 'PAX',
     addressToken: '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
     addressPSM: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
-    addressGemJoin: '0x7bbd8cA5e413bCa521C2c80D8d1908616894Cf21',
+    addressGemJoin: '0x79A0FA989fb7ADf1F8e80C93ee605Ebb94F7c6A5',
     abiToken: PsmAbi,
     decimals: 10 ** 18,
+  },
+  GUSD: {
+    ilkTokenName: 'PSM-GUSD-A',
+    nameToken: 'GUSD',
+    addressToken: '0x056Fd409E1d7A124BD7017459dFEa2F387b6d5Cd',
+    addressPSM: '0x204659B2Fd2aD5723975c362Ce2230Fba11d3900',
+    addressGemJoin: '0x79A0FA989fb7ADf1F8e80C93ee605Ebb94F7c6A5',
+    abiToken: PsmAbi,
+    decimals: 10 ** 2,
   },
 };
 
