@@ -49,7 +49,7 @@ const admitedCollaterals = {
     nameToken: 'PAX',
     addressToken: '0x8E870D67F660D95d5be530380D0eC0bd388289E1',
     addressPSM: '0x961Ae24a1Ceba861D1FDf723794f6024Dc5485Cf',
-    addressGemJoin: '0x79A0FA989fb7ADf1F8e80C93ee605Ebb94F7c6A5',
+    addressGemJoin: '0x7bbd8cA5e413bCa521C2c80D8d1908616894Cf21',
     abiToken: PsmAbi,
     decimals: 10 ** 18,
   },
