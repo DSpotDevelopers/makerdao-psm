@@ -8,28 +8,13 @@ import ConnectButton from '../../components/connect-button/ConnectButton';
 import TransferButton from '../../components/transfer-button/TransferButton';
 import Input from '../../components/input/Input';
 import Select from '../../components/select/Select';
-import DAIImg from '../../assets/dai.png';
-import USDCImg from '../../assets/usdc.png';
-import PAXImg from '../../assets/pax.png';
+
 import Button from '../../components/button/Button';
 import Info from '../../components/info/Info';
 import StatsImg from '../../assets/dollar.svg';
 import InfoImg from '../../assets/hand.svg';
-import { usePsmService } from '../../services/psm/PsmProvider';
+import { currencies, usePsmService } from '../../services/psm/PsmProvider';
 import Notification from '../../components/notification/Notification';
-
-const currencies = [{
-  name: 'DAI',
-  image: DAIImg,
-}, {
-  name: 'USDC',
-  image: USDCImg,
-},
-{
-  name: 'PAX',
-  image: PAXImg,
-},
-];
 
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
